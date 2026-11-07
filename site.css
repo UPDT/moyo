@@ -1,0 +1,80 @@
+/* Общее для всех страниц сайта Coreless: база, заголовки секций, ряд кнопок, список с галочками, вопросы, финал, подвал, появление.
+   Подключать после токенов и coreless.css, до стилей страницы. Цвета, шрифты, отступы и компоненты — из токенов системы. */
+*, *::before, *::after { box-sizing: border-box }
+html { color-scheme: dark; scroll-behavior: smooth; scroll-padding-top: 80px }
+[data-theme="light"] { color-scheme: light }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto } }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: var(--fs-md); line-height: var(--lh-md); letter-spacing: var(--ls-md);
+  font-optical-sizing: auto; font-feature-settings: "cv01", "ss03"; -webkit-font-smoothing: antialiased }
+.wrap { max-width: var(--container); margin: 0 auto; padding: 0 var(--gutter) }
+main > section { padding: var(--section-y) 0 }
+h1, h2, h3, p, ul, ol { margin: 0 }
+ul, ol { padding: 0; list-style: none }
+
+/* ---------- Заголовки секций ---------- */
+.sec-head { display: grid; gap: var(--sp-3); margin-bottom: var(--sp-12) }
+.sec-title { max-width: 32ch; font-size: var(--fs-3xl); line-height: var(--lh-3xl); letter-spacing: var(--ls-3xl); font-weight: var(--w-medium); text-wrap: balance }
+.sec-title > span { display: block; color: var(--text-muted) }
+
+/* ---------- Ряд кнопок призыва (первый экран, финал) ---------- */
+.hero-cta { display: flex; flex-wrap: wrap; gap: var(--sp-3) }
+
+/* ---------- Список с галочками ---------- */
+.ticks { display: grid; gap: var(--sp-3); margin-top: var(--sp-2) }
+.ticks li { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: var(--sp-3); font-size: var(--fs-base); line-height: var(--lh-base); color: var(--text-secondary) }
+.ticks .lucide { width: 16px; height: 16px; margin-top: 2px; color: var(--accent-text) }
+
+/* ---------- Вопросы ---------- */
+.faq { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); gap: var(--sp-16); align-items: start }
+.faq .sec-head { margin: 0; position: sticky; top: 96px }
+
+/* ---------- Финал ---------- */
+/* как у Linear: без коробки и градиента; заголовок и строка слева, кнопки справа по нижней линии; сверху — тонкая линия */
+.final { padding-bottom: var(--sp-24) }
+.final-in { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--sp-8); row-gap: var(--sp-3); align-items: end; padding-top: var(--sp-16); box-shadow: inset 0 1px 0 var(--border-subtle) }
+.final-title { grid-column: 1; font-size: var(--fs-3xl); line-height: var(--lh-3xl); letter-spacing: var(--ls-3xl); font-weight: var(--w-medium); text-wrap: balance }
+.final-in > p { grid-column: 1; max-width: var(--measure); color: var(--text-muted); text-wrap: pretty }
+.final .hero-cta { grid-column: 2; grid-row: 1 / span 2 }
+
+/* ---------- Подвал ---------- */
+.foot { padding: var(--sp-16) 0 var(--sp-8); box-shadow: inset 0 1px 0 var(--border-subtle); font-size: var(--fs-sm); line-height: var(--lh-sm) }
+.foot-top { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--sp-16) }
+.foot-brand { display: grid; gap: var(--sp-3); align-content: start }
+.foot-brand p { color: var(--text-muted) }
+.foot-cols { display: grid; grid-template-columns: repeat(3, 180px); gap: var(--sp-8) }
+.foot-cols div { display: grid; gap: var(--sp-3); align-content: start }
+.foot-cols b { font-weight: var(--w-medium); color: var(--text) }
+.foot-cols a { width: fit-content; color: var(--text-muted); text-decoration: none; transition: color var(--dur-hover-out) var(--ease-hover) }
+@media (hover: hover) and (pointer: fine) { .foot-cols a:hover { color: var(--text); transition-duration: var(--dur-hover-in) } }
+.foot-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: var(--sp-16); padding-top: var(--sp-6); box-shadow: inset 0 1px 0 var(--border-subtle); color: var(--text-faint) }
+.foot-cols a[aria-current="page"] { color: var(--text) }   /* текущая страница и в подвале */
+
+/* ---------- Движение: вход первого экрана и появление блоков при прокрутке (один раз) ---------- */
+@keyframes rise { from { opacity: 0; transform: translateY(12px) } }
+.js [class*="in-"] { animation: rise var(--dur-reveal) var(--ease-reveal) both }
+.js .in-2 { animation-delay: 80ms } .js .in-3 { animation-delay: 140ms } .js .in-4 { animation-delay: 200ms } .js .in-5 { animation-delay: 320ms }
+.js .rv { opacity: 0; transform: translateY(16px); transition: opacity var(--dur-reveal) var(--ease-reveal), transform var(--dur-reveal) var(--ease-reveal) }
+.js .rv.in { opacity: 1; transform: none }
+@media (prefers-reduced-motion: reduce) {
+  @keyframes rise { from { opacity: 0 } }
+  .js .rv { transform: none }
+}
+
+/* ---------- Ширины ---------- */
+@media (max-width: 1100px) {
+  .foot-top { grid-template-columns: minmax(0, 1fr) }
+}
+@media (max-width: 860px) {
+  .final-title { font-size: var(--fs-2xl); line-height: var(--lh-2xl); letter-spacing: var(--ls-2xl) }
+  .sec-title { font-size: var(--fs-2xl); line-height: var(--lh-2xl); letter-spacing: var(--ls-2xl) }
+  .faq { grid-template-columns: minmax(0, 1fr); gap: var(--sp-8) }
+  .faq .sec-head { position: static }
+  .final-in { grid-template-columns: minmax(0, 1fr); padding-top: var(--sp-12) }
+  .final .hero-cta { grid-column: 1; grid-row: auto; margin-top: var(--sp-3) }
+  .foot-cols { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+  .sec-head { margin-bottom: var(--sp-8) }
+}
+@media (max-width: 520px) {
+  .hero-cta .btn { flex: 1 1 100% }
+}
+

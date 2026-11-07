@@ -1,0 +1,19 @@
+/* Иконки · набор Lucide (lucide.dev), линейные, единый штрих.
+   Эмодзи и текстовые символы (☀ ⋯ → ✓ —) вместо иконок не используются. */
+
+:root {
+  --icon-sm: 14px;   /* внутри мелкого текста 12–13px, бейджи, kbd-строки */
+  --icon-md: 16px;   /* по умолчанию: кнопки, пункты меню, поля, заголовки карточек */
+  --icon-lg: 20px;   /* крупные кнопки-иконки, пустые состояния */
+  --icon-stroke: 1.5; /* тонкий штрих — в тон весу шрифта 400–510 */
+}
+
+.lucide {
+  width: var(--icon-md);
+  height: var(--icon-md);
+  stroke-width: var(--icon-stroke);
+  flex: none;
+  vertical-align: middle;
+}
+.icon-sm { width: var(--icon-sm); height: var(--icon-sm); }
+.icon-lg { width: var(--icon-lg); height: var(--icon-lg); }

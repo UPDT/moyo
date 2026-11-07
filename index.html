@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="ru" data-store="moyo" data-theme-default="system" data-accent-default="pine" data-palette-default="mono" data-auth="guest">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Moyo, запись и разбор партий в го</title>
+<meta name="description" content="Moyo записывает партию в го с камеры телефона. KataGo разбирает её под ваш уровень, а из ошибок получаются задачи. Скоро в App Store для iPhone, iPad и Mac.">
+<link rel="icon" href="img/icon-64.png" type="image/png">
+<link rel="apple-touch-icon" href="img/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..700&family=JetBrains+Mono:wght@400;500&family=Unbounded:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens/colors.css"><link rel="stylesheet" href="tokens/accents.css"><link rel="stylesheet" href="tokens/palettes.css">
+<link rel="stylesheet" href="tokens/motion.css">
+<link rel="stylesheet" href="tokens/type.css">
+<link rel="stylesheet" href="tokens/space.css">
+<link rel="stylesheet" href="tokens/scrollbar.css">
+<link rel="stylesheet" href="tokens/icons.css">
+<link rel="stylesheet" href="tokens/components.css">
+<link rel="stylesheet" href="tokens/layers.css">
+<link rel="stylesheet" href="tokens/data.css">
+<link rel="stylesheet" href="tokens/nav.css">
+<link rel="stylesheet" href="tokens/tiles.css">
+<link rel="stylesheet" href="tokens/soft.css">
+<link rel="stylesheet" href="moyo.css">
+<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="landing.css">
+<script src="js/theme.js"></script>
+<script>document.documentElement.classList.add('js')</script>
+<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<script src="js/scroll-lock.js" defer></script>
+<script src="js/layers.js" defer></script>
+<script src="js/inputs.js" defer></script>
+<script src="js/data.js" defer></script>
+<script src="js/nav.js" defer></script>
+<script src="js/scrollbar.js" defer></script>
+<script src="site.js" defer></script>
+<script src="landing.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="Moyo, в начало"><img src="img/icon-64.png" alt="" width="26" height="26">Moyo</a>
+    <nav class="navmenu" aria-label="Основная навигация">
+      <a class="nav-link" href="#features">Возможности</a>
+      <a class="nav-link" href="#pricing">Цена</a>
+      <a class="nav-link" href="#faq">Вопросы</a>
+    </nav>
+    <div class="nav-end">
+      <div class="nav-guest">
+        <a class="btn btn-primary btn-sm" href="#start" data-tg><i data-lucide="send"></i>Узнать о выходе</a>
+      </div>
+    </div>
+    <button class="burger" id="burger" aria-label="Меню" aria-expanded="false" aria-controls="mnav"><span></span><span></span></button>
+  </div>
+</header>
+<div class="mnav" id="mnav" data-modal-layer role="dialog" aria-modal="true" aria-label="Меню навигации"><div class="mnav-in">
+  <nav class="mnav-list" id="mnav-list"></nav>
+  <div class="mnav-actions">
+    <div class="m-guest">
+      <a class="btn btn-primary" href="#start" data-tg><i data-lucide="send"></i>Узнать о выходе</a>
+    </div>
+    <div class="mtheme"><span>Тема</span><div class="tseg" role="group" aria-label="Тема"><button class="tseg-b" role="radio" data-theme-v="light" aria-label="Светлая"><i data-lucide="sun"></i></button><button class="tseg-b" role="radio" data-theme-v="dark" aria-label="Тёмная"><i data-lucide="moon"></i></button><button class="tseg-b" role="radio" data-theme-v="system" aria-label="Как в системе"><i data-lucide="monitor"></i></button></div></div>
+  </div>
+</div></div>
+
+<main id="top">
+
+  <!-- ===== Первый экран и демо ===== -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-top">
+        <div class="hero-tx">
+          <h1 class="hero-title in-1"><span class="hero-brand">Moyo</span> записывает партию с доски и показывает ваши ошибки</h1>
+          <p class="hero-lead in-2">Поставьте телефон над доской и играйте. Moyo запишет каждый ход, а после партии покажет, где вы теряли очки, и сделает из этих позиций задачи. Скоро для iPhone, iPad и Mac.</p>
+          <div class="hero-cta in-3">
+            <a class="btn btn-accent btn-xl" href="#start" data-tg><i data-lucide="send"></i>Узнать о выходе первым</a>
+          </div>
+          <p class="hero-note in-3">Канал Moyo в Telegram, только новости о выходе</p>
+        </div>
+        <div class="hs in-4" aria-hidden="true">
+          <div class="hs-stage">
+            <div class="hs-board">
+              <svg class="goban hs-top" viewBox="0 0 200 200">
+                <defs><filter id="hs-grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.008 0.16" numOctaves="3" seed="11"/><feColorMatrix values="0 0 0 0 .45  0 0 0 0 .27  0 0 0 0 .08  0 0 0 1.4 -.55"/></filter></defs>
+                <rect class="gb-wood" x="0" y="0" width="200" height="200"/>
+                <rect class="hs-grain" x="0" y="0" width="200" height="200" filter="url(#hs-grain)"/>
+                <g class="gb-lines"><path d="M20 20H180M20 40H180M20 60H180M20 80H180M20 100H180M20 120H180M20 140H180M20 160H180M20 180H180M20 20V180M40 20V180M60 20V180M80 20V180M100 20V180M120 20V180M140 20V180M160 20V180M180 20V180"/></g>
+                <g class="gb-star"><circle cx="60" cy="60" r="2.5"/><circle cx="140" cy="60" r="2.5"/><circle cx="100" cy="100" r="2.5"/><circle cx="60" cy="140" r="2.5"/><circle cx="140" cy="140" r="2.5"/></g>
+              </svg>
+              <div class="hs-light"><i></i></div>
+              <i class="hs-side hs-sb"></i><i class="hs-side hs-stp"></i><i class="hs-side hs-sr"></i><i class="hs-side hs-sl"></i>
+              <div class="hs-stones"></div>
+            </div>
+          </div>
+          <i class="hs-f hs-f1 w"></i><i class="hs-f hs-f2 b"></i><i class="hs-f hs-f3 w"></i><i class="hs-f hs-f4 b"></i><i class="hs-f hs-f5 b"></i>
+          <div class="hs-phone">
+            <div class="hp-screen"><i class="hp-island"></i>
+              <div class="hp-top"><span class="hp-rec"><i></i>Запись</span><span class="hp-n">Ход 0</span></div>
+              <svg class="goban hp-board" viewBox="0 0 200 200">
+                <rect class="gb-wood" x="0" y="0" width="200" height="200" rx="8"/>
+                <g class="gb-lines"><path d="M20 20H180M20 40H180M20 60H180M20 80H180M20 100H180M20 120H180M20 140H180M20 160H180M20 180H180M20 20V180M40 20V180M60 20V180M80 20V180M100 20V180M120 20V180M140 20V180M160 20V180M180 20V180"/></g>
+                <g class="gb-star"><circle cx="60" cy="60" r="2.5"/><circle cx="140" cy="60" r="2.5"/><circle cx="100" cy="100" r="2.5"/><circle cx="60" cy="140" r="2.5"/><circle cx="140" cy="140" r="2.5"/></g>
+                <g class="hp-stones"></g>
+                <circle class="hp-last" cx="0" cy="0" r="4"/>
+                <path class="hp-focus" d="M-16 -8V-16H-8M8 -16H16V-8M16 8V16H8M-8 16H-16V8"/>
+              </svg>
+              <div class="hp-move"><span>Последний ход</span><b class="hp-mv">Ждём ход</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Возможности: четыре вещи, у каждой картинка и ответ на главное сомнение ===== -->
+  <section id="features" aria-labelledby="feat-h">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <span class="t-label">Возможности</span>
+        <h2 class="sec-title" id="feat-h">Что Moyo делает с вашей партией</h2>
+      </div>
+      <div class="ft-list">
+        <article class="ft rv">
+          <div class="ft-tx">
+            <h3>Запись без бланка</h3>
+            <p>Поставьте телефон над доской, и Moyo запишет каждый ход, пока вы играете. Проверять запись после партии не нужно. Старые партии Moyo распознаёт по видео из галереи, а позицию на доске по фото.</p>
+          </div>
+          <div class="tile-stage ft-viz" style="--w:220px">
+            <div class="vz-cam" aria-hidden="true">
+              <div class="vc-top"><span class="badge"><span class="dot"></span>Запись 32:14</span><span class="vc-move hl">Ход 47</span></div>
+              <svg class="goban" viewBox="0 0 200 200">
+                <rect class="gb-wood" x="0" y="0" width="200" height="200" rx="10"/>
+                <g class="gb-lines"><path d="M20 20H180M20 40H180M20 60H180M20 80H180M20 100H180M20 120H180M20 140H180M20 160H180M20 180H180M20 20V180M40 20V180M60 20V180M80 20V180M100 20V180M120 20V180M140 20V180M160 20V180M180 20V180"/></g>
+                <g class="gb-star"><circle cx="60" cy="60" r="2.5"/><circle cx="140" cy="60" r="2.5"/><circle cx="100" cy="100" r="2.5"/><circle cx="60" cy="140" r="2.5"/><circle cx="140" cy="140" r="2.5"/></g>
+                <g class="gb-b"><circle cx="60" cy="60" r="9"/><circle cx="80" cy="120" r="9"/><circle cx="140" cy="140" r="9"/><circle cx="120" cy="80" r="9"/><circle cx="60" cy="140" r="9"/><circle cx="100" cy="100" r="9"/></g>
+                <g class="gb-w"><circle cx="140" cy="60" r="9"/><circle cx="60" cy="100" r="9"/><circle cx="120" cy="140" r="9"/><circle cx="140" cy="100" r="9"/><circle cx="80" cy="40" r="9"/></g>
+                <circle class="gb-last" cx="100" cy="100" r="4"/>
+              </svg>
+            </div>
+          </div>
+        </article>
+        <article class="ft rv">
+          <div class="ft-tx">
+            <h3>Ошибки для вашего уровня</h3>
+            <p>KataGo оценивает каждый ход, а Moyo отмечает ошибки с учётом вашего ранга: для 15 кю потеря в 6 очков будет неточностью, а для 3 дана ошибкой. Рядом с ошибкой написано, что случилось на доске и какой ход был лучше.</p>
+          </div>
+          <div class="tile-stage ft-viz" style="--w:340px">
+            <div class="vz-box vz-why" aria-hidden="true">
+              <b class="vw-t">Ход 52 потерял 9,8 оч.</b>
+              <div class="vz-row"><span>ваша группа слева ослабла</span><span>≈ 6 оч.</span></div>
+              <div class="vz-row"><span>камни соперника ушли от атаки</span><span>≈ 4 оч.</span></div>
+              <div class="vw-best"><span>Лучший ход для 5 кю</span><b class="hl">D10</b></div>
+            </div>
+          </div>
+        </article>
+        <article class="ft rv">
+          <div class="ft-tx">
+            <h3>Задачи из ваших ошибок</h3>
+            <p>Позиции, где вы ошиблись, становятся сборником задач: в каждой надо найти ход, который вы пропустили. Есть и каталог задач, и сборники из SGF и PDF.</p>
+          </div>
+          <div class="tile-stage ft-viz" style="--w:400px">
+            <div class="vz-box vz-prob" aria-hidden="true">
+              <div class="vp-head"><b>Ошибки в дебюте</b><span>Решено 34 из 50</span></div>
+              <div class="progress"><i style="--p:.68"></i></div>
+              <div class="vz-row"><span>Задача 35, ход 18</span><span class="muted">Не решено</span></div>
+              <div class="vz-row"><span>Задача 34, ход 12</span><span class="hl">Верно</span></div>
+              <div class="vz-row"><span>Задача 33, ход 27</span><span>Решено</span></div>
+            </div>
+          </div>
+        </article>
+        <article class="ft rv">
+          <div class="ft-tx">
+            <h3>Работает без интернета</h3>
+            <p>KataGo считает прямо на телефоне, поэтому партию можно разобрать в турнирном зале. Партии переходят на iPad и Mac через iCloud.</p>
+          </div>
+          <div class="tile-stage ft-viz" style="--w:320px">
+            <div class="vz-rows" aria-hidden="true">
+              <div class="vz-row"><span>Интернет</span><span class="muted"><i data-lucide="wifi-off"></i>Нет</span></div>
+              <div class="vz-row"><span>Разбор партии</span><span class="hl">141 из 141 хода</span></div>
+              <div class="vz-row"><span>iPad</span><span>В iCloud</span></div>
+              <div class="vz-row"><span>Mac</span><span>В iCloud</span></div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Цена ===== -->
+  <section id="pricing" aria-labelledby="price-h">
+    <div class="wrap">
+      <div class="price rv">
+        <div class="price-tx">
+          <span class="t-label">Цена</span>
+          <h2 class="sec-title" id="price-h">Запись бесплатно, разбор по подписке</h2>
+          <p>Записывать партии и вести библиотеку можно без оплаты. KataGo работает по подписке Moyo AI, её цену объявим перед выходом.</p>
+        </div>
+        <div class="price-card">
+          <div class="pc-group">
+            <div class="pc-head"><span>Бесплатно</span></div>
+            <ul class="ticks">
+              <li><i data-lucide="check"></i>Запись с камеры и из видео</li>
+              <li><i data-lucide="check"></i>Библиотека партий и SGF</li>
+              <li><i data-lucide="check"></i>Задачи из каталога</li>
+            </ul>
+          </div>
+          <div class="pc-group">
+            <div class="pc-head"><span>Moyo AI</span><span class="badge badge-accent">Неделя бесплатно</span></div>
+            <ul class="ticks">
+              <li><i data-lucide="check"></i>Разбор партий с KataGo</li>
+              <li><i data-lucide="check"></i>Игра с KataGo</li>
+              <li><i data-lucide="check"></i>Задачи из ваших ошибок</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Вопросы ===== -->
+  <section id="faq" aria-labelledby="faq-h">
+    <div class="wrap faq">
+      <div class="sec-head rv">
+        <span class="t-label">Вопросы</span>
+        <h2 class="sec-title" id="faq-h">Частые вопросы</h2>
+      </div>
+      <div class="acc rv" data-single>
+        <details class="acc-item"><summary><span>Когда выйдет Moyo?</span></summary><div class="acc-body"><p>Дату выхода объявим в Telegram-канале Moyo.</p></div></details>
+        <details class="acc-item"><summary><span>Как поставить телефон?</span></summary><div class="acc-body"><p>Над доской, чтобы она целиком попадала в кадр, при хорошем свете. Подойдёт штатив с держателем для телефона.</p></div></details>
+        <details class="acc-item"><summary><span>Нужно ли проверять ходы после записи?</span></summary><div class="acc-body"><p>Нет. Moyo записывает партию сам, от первого хода до последнего.</p></div></details>
+        <details class="acc-item"><summary><span>Нужен ли интернет?</span></summary><div class="acc-body"><p>Нет. Запись и разбор работают на устройстве.</p></div></details>
+        <details class="acc-item"><summary><span>Что работает без подписки?</span></summary><div class="acc-body"><p>Запись партий, библиотека, SGF и задачи из каталога. Подписка нужна для разбора, игры с KataGo и задач из ошибок.</p></div></details>
+        <details class="acc-item"><summary><span>Есть ли версия для Android?</span></summary><div class="acc-body"><p>Нет, только iPhone и iPad на iOS 17 и Mac на macOS 15 и новее.</p></div></details>
+        <details class="acc-item"><summary><span>Можно загрузить отсканированный сборник?</span></summary><div class="acc-body"><p>Нет. Moyo читает PDF только с векторными диаграммами.</p></div></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Финал ===== -->
+  <section class="final" id="start" aria-labelledby="final-h">
+    <div class="wrap">
+      <div class="final-in rv">
+        <h2 class="final-title" id="final-h">Узнайте о выходе Moyo первым</h2>
+        <p>Новости о выходе публикуем в Telegram-канале. Moyo выйдет для iPhone, iPad и Mac.</p>
+        <div class="hero-cta">
+          <a class="btn btn-accent btn-xl" href="#start" data-tg><i data-lucide="send"></i>Канал в Telegram</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="foot-brand"><a class="logo" href="#top"><img src="img/icon-64.png" alt="" width="26" height="26">Moyo</a><p>Запись и разбор партий в го</p></div>
+      <nav class="foot-cols" aria-label="Подвал">
+        <div><b>Приложение</b><a href="#features">Возможности</a><a href="#pricing">Цена</a></div>
+        <div><b>Помощь</b><a href="#faq">Вопросы</a><a href="#start" data-tg>Telegram-канал</a></div>
+      </nav>
+    </div>
+    <div class="foot-bottom"><span>© 2026 Moyo</span><div class="tseg" role="group" aria-label="Тема"><button class="tseg-b" role="radio" data-theme-v="light" aria-label="Светлая"><i data-lucide="sun"></i></button><button class="tseg-b" role="radio" data-theme-v="dark" aria-label="Тёмная"><i data-lucide="moon"></i></button><button class="tseg-b" role="radio" data-theme-v="system" aria-label="Как в системе"><i data-lucide="monitor"></i></button></div></div>
+  </div>
+</footer>
+</body>
+</html>

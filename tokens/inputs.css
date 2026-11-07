@@ -1,0 +1,303 @@
+/* Ввод · расширенные поля. Требует components.css (поле, меню, список, кнопка-иконка) и js/inputs.js.
+   Общие правила:
+   - всё, что выглядит как поле, — высота 36 (--h-md), радиус 8, рамка 1px, фокус — рамка цветом --focus-field без свечения
+   - элементы внутри поля (кнопки, теги, kbd) отстоят от края на 4px; иконка слева — на 12px, как у обычного поля
+   - выпадающие части — тот же .menu: появление 180 мс из .97, уход 140 мс
+   - на телефоне цели касания ≥ 40px */
+
+:where(.tag, .stepper button, .tgl button, .swatch, .cal-day, .dz) { --hd: var(--dur-hover-out); --pd: var(--dur-press-out) }
+@media (hover: hover) and (pointer: fine) { :where(.tag, .stepper button, .tgl button, .swatch, .cal-day, .dz):hover { --hd: var(--dur-hover-in) } }
+:where(.stepper button, .tgl button, .swatch, .cal-day):active { --pd: var(--dur-press-in) }
+:where(.tgl button, .swatch, .cal-day, .dz, .otp input) { outline: var(--focus-outline) solid transparent; outline-offset: var(--focus-offset);
+  transition: outline-color var(--dur-focus) var(--ease-out) }
+:where(.tgl button, .swatch, .cal-day, .dz):focus-visible { outline-color: var(--focus) }
+
+/* ============ Поиск ============
+   kbd-подсказка видна, пока поле пустое; появился текст — на её месте кнопка очистки. Esc очищает. */
+.search .trail { gap: var(--sp-1) }
+.search .trail > * { transition: opacity var(--dur-exit) var(--ease-out), transform var(--dur-exit) var(--ease-out) }
+.search .clear { position: absolute; right: 0; opacity: 0; transform: scale(.9); pointer-events: none }
+.search:has(.input:not(:placeholder-shown)) .clear { opacity: 1; transform: none; pointer-events: auto; transition-duration: var(--dur-enter) }
+.search:has(.input:not(:placeholder-shown)) .kbd { opacity: 0; transform: scale(.9) }
+.search .input::-webkit-search-cancel-button { display: none }
+
+/* ============ Пароль ============ */
+.pw .trail .icon-btn { color: var(--text-muted) }
+.pw [data-pw-toggle] .lucide { grid-area: 1 / 1; transition: opacity var(--dur-enter) var(--ease-out), transform var(--dur-enter) var(--ease-out) }
+.pw [data-pw-toggle] .i-hide, .pw [data-pw-toggle][aria-pressed=true] .i-show { opacity: 0; transform: scale(.7) }
+.pw [data-pw-toggle][aria-pressed=true] .i-hide { opacity: 1; transform: none }
+/* надёжность: 4 сегмента 4px, цвет по уровню; подпись справа от полосы */
+.strength { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: var(--sp-3) }
+.strength-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-1) }
+.strength-bar i { height: 4px; border-radius: var(--r-full); background: var(--tile-strong); transition: background-color var(--dur-state) var(--ease-out) }
+.strength-text { min-width: 72px; text-align: right; transition: color var(--dur-state) var(--ease-out); font-size: var(--fs-sm); line-height: var(--lh-sm); color: var(--text-muted); font-variant-numeric: tabular-nums }
+.strength[data-level="1"] i:nth-child(-n+1) { background: var(--danger) }
+.strength[data-level="2"] i:nth-child(-n+2) { background: var(--warning) }
+.strength[data-level="3"] i:nth-child(-n+3) { background: var(--success) }
+.strength[data-level="4"] i:nth-child(-n+4) { background: var(--success) }
+.strength[data-level="1"] .strength-text { color: var(--danger-text) }
+.strength[data-level="2"] .strength-text { color: var(--warning-text) }
+.strength[data-level="3"] .strength-text, .strength[data-level="4"] .strength-text { color: var(--success-text) }
+
+/* ============ Код из SMS (OTP) ============
+   6 ячеек 40×48 по 3 с разделителем; вставка раскладывает код по ячейкам, Backspace идёт назад */
+.otp { display: flex; align-items: center; gap: var(--sp-2) }
+@media (max-width: 400px) { .otp { gap: var(--sp-1) } }   /* 6×40 + 8 + 6×4 = 272 — ячейки остаются целыми 40px */
+.otp .sep { width: 8px; height: 1px; background: var(--border-strong); border-radius: 1px }
+.otp input { flex: 0 1 40px; width: 40px; min-width: 0; height: 48px; padding: 0; border: 0; border-radius: var(--r-sm); text-align: center; caret-color: var(--accent);
+  background: var(--bg-raised); box-shadow: inset 0 0 0 1px var(--border); color: var(--text);
+  font: var(--w-medium) var(--fs-lg)/1 var(--font-mono); font-variant-numeric: tabular-nums;
+  transition: box-shadow var(--hd, var(--dur-hover-out)) var(--ease-hover) }
+@media (hover: hover) and (pointer: fine) { .otp input:hover { box-shadow: inset 0 0 0 1px var(--border-strong) } }
+.otp input:focus { outline: none; box-shadow: inset 0 0 0 var(--focus-width) var(--focus-field); --hd: var(--dur-focus) }
+.otp[aria-invalid=true] input { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--danger) 70%, transparent) }
+.otp.shake { animation: shake 320ms var(--ease-out) }
+@keyframes shake { 20% { transform: translateX(-4px) } 40% { transform: translateX(4px) } 60% { transform: translateX(-2px) } 80% { transform: translateX(2px) } }
+
+/* ============ Число со степпером ============
+   [−] значение [+] в одном поле 36; кнопки 28 внутри с отступом 4; удержание повторяет шаг */
+.stepper { position: relative; display: inline-flex; align-items: center; height: var(--h-md); padding: 0 var(--sp-1); border-radius: var(--r-sm);
+  background: var(--bg-raised); box-shadow: inset 0 0 0 1px var(--border); transition: box-shadow var(--dur-hover-out) var(--ease-hover) }
+@media (hover: hover) and (pointer: fine) { .stepper:hover { box-shadow: inset 0 0 0 1px var(--border-strong) } }
+.stepper:focus-within { box-shadow: inset 0 0 0 var(--focus-width) var(--focus-field) }
+.stepper input { flex: 1; width: 6ch; min-width: 0; height: 100%; padding: 0; border: 0; background: none; color: var(--text); text-align: center;
+  font: inherit; font-variant-numeric: tabular-nums; appearance: textfield; -moz-appearance: textfield }
+.stepper input:focus { outline: none }
+.stepper input::-webkit-inner-spin-button, .stepper input::-webkit-outer-spin-button { appearance: none; margin: 0 }
+.stepper button { display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: var(--r-xs); background: none;
+  color: var(--text-muted); cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--hd) var(--ease-hover), color var(--hd) var(--ease-hover), transform var(--pd) var(--ease-out) }
+@media (hover: hover) and (pointer: fine) { .stepper button:hover { color: var(--text) } }   /* только иконка ярче, без подложки */
+.stepper button:disabled { opacity: .35; pointer-events: none }
+.stepper .unit { padding-right: var(--sp-2); color: var(--text-muted); font-size: var(--fs-sm) }
+
+/* ============ Ползунок ============
+   Родной <input type=range> (клавиатура, формы, экранные дикторы). Заливка — градиент до --p, бегунок 16 белый, как у переключателя.
+   Диапазон — два ползунка на одной дорожке: дорожка не ловит клики, ловят только бегунки. */
+/* Ползунок — толстая дорожка-капсула. Заливка — тоже капсула, которая обнимает бегунки: её концы — ровно края бегунков.
+   Бегунок = круг --th с кольцом цвета заливки и белой точкой внутри, поэтому он всегда «вписан» в заливку.
+   --p/--p2 — доли 0…1; центр нативного бегунка = th/2 + (W − th)·p. Дорожка в разметке после input — поэтому z-index. */
+.slider { position: relative; display: grid; height: var(--th); align-items: center; --th: 20px; --p: 0; --p2: 1;
+  --x1: calc(var(--th) / 2 + (100% - var(--th)) * var(--p)); --x2: calc(var(--th) / 2 + (100% - var(--th)) * var(--p2)) }
+.slider input { grid-area: 1 / 1; position: relative; z-index: 1; width: 100%; height: var(--th); margin: 0; background: none; appearance: none; -webkit-appearance: none; cursor: pointer;
+  outline: none; -webkit-tap-highlight-color: transparent }
+.slider .track { grid-area: 1 / 1; position: relative; z-index: 0; height: var(--th); border-radius: var(--r-full); pointer-events: none; overflow: hidden; background: var(--tile) }
+.slider .fill { position: absolute; top: 0; bottom: 0; left: 0; width: calc(var(--x1) + var(--th) / 2); border-radius: var(--r-full); background: var(--accent) }
+.slider.range .fill { left: calc(var(--x1) - var(--th) / 2); width: calc(var(--x2) - var(--x1) + var(--th)) }
+/* деления — тонкие линии по шагам; под заливкой их не видно */
+.slider .tick { position: absolute; top: 0; bottom: 0; width: 1px; margin-left: -1px; background: color-mix(in srgb, var(--text) 8%, transparent) }
+.slider input::-webkit-slider-runnable-track { height: var(--th); background: none }
+.slider input::-moz-range-track { height: var(--th); background: none }
+.slider input::-webkit-slider-thumb { -webkit-appearance: none; box-sizing: border-box; width: var(--th); height: var(--th); border: 4px solid var(--accent); border-radius: 50%; background: var(--accent-fg);
+  box-shadow: 0 0 0 0 transparent; cursor: grab;
+  transition: border-width var(--dur-press-out) var(--ease-out), box-shadow var(--dur-focus) var(--ease-out) }
+.slider input::-moz-range-thumb { box-sizing: border-box; width: var(--th); height: var(--th); border: 4px solid var(--accent); border-radius: 50%; background: var(--accent-fg); cursor: grab;
+  transition: border-width var(--dur-press-out) var(--ease-out) }
+/* нажатие — точка чуть растёт внутри капсулы (бегунок за края заливки не выходит) */
+.slider input:active::-webkit-slider-thumb { cursor: grabbing }
+.slider input:active::-moz-range-thumb { cursor: grabbing }
+/* фокус с клавиатуры — контур вокруг бегунка (без свечения) */
+.slider input:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--focus) }
+.slider input:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--focus) }
+.slider.range input { pointer-events: none }
+.slider.range input::-webkit-slider-thumb { pointer-events: auto }
+.slider.range input::-moz-range-thumb { pointer-events: auto }
+.slider input:disabled { cursor: not-allowed; opacity: .5 }
+/* шкала (data-scale): подпись под каждым шагом, ровно под центром бегунка в этой точке; выбранные — ярче */
+.slider-scale { position: relative; height: var(--lh-xs); margin-top: calc(var(--sp-1) * -1); --th: 20px; font-size: var(--fs-xs); line-height: var(--lh-xs); font-variant-numeric: tabular-nums }
+.slider-scale span { position: absolute; top: 0; transform: translateX(-50%); color: var(--text-muted); opacity: .6;
+  transition: color var(--dur-enter) var(--ease-out), opacity var(--dur-enter) var(--ease-out) }
+.slider-scale span.in { color: var(--text); opacity: 1; font-weight: var(--w-medium) }
+/* подпись и значение в одной строке над ползунком */
+.slider-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-3) }
+.slider-head output { font-size: var(--fs-sm); line-height: var(--lh-sm); color: var(--text); font-variant-numeric: tabular-nums }
+.slider-ticks { display: flex; justify-content: space-between; padding: 0 2px; font-size: var(--fs-xs); line-height: var(--lh-xs); color: var(--text-muted); font-variant-numeric: tabular-nums }
+
+/* ============ Группа переключателей ============
+   В отличие от сегментов (выбор одного, плашка едет) — каждая кнопка включается сама по себе.
+   Вид контейнера тот же, что у сегментов; включённая — подложка как у плашки сегментов. */
+.tgl { display: inline-flex; justify-self: start; align-self: start; padding: 2px; gap: 2px; border-radius: var(--r-md); background: var(--seg-track); box-shadow: inset 0 0 0 1px var(--border-subtle) }
+.tgl button { display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2); min-width: 28px; height: 28px; padding: 0 6px; border: 0;
+  border-radius: var(--r-sm); background: transparent; color: var(--text-muted); cursor: pointer; font: inherit; font-size: var(--fs-sm); font-weight: var(--w-medium);
+  transition: background-color var(--hd) var(--ease-hover), color var(--hd) var(--ease-hover), box-shadow var(--hd) var(--ease-hover),
+              outline-color var(--dur-focus) var(--ease-out), transform var(--pd) var(--ease-out) }
+@media (hover: hover) and (pointer: fine) { .tgl button:hover { color: var(--text-secondary) } }
+.tgl button[aria-pressed=true] { --hd: var(--dur-enter); background: var(--seg-on); color: var(--text); box-shadow: inset 0 0 0 1px var(--seg-ring), var(--seg-shadow) }
+.tgl .tgl-sep { width: 1px; margin: 6px 2px; background: var(--border) }
+
+/* ============ Цвет ============
+   Образцы — радиокнопки 24px; выбранный — кольцо цветом текста через зазор 2px фона (тот же язык, что фокус).
+   Свой цвет — поле HEX с превью слева; системная палитра открывается кликом по превью. */
+.swatches { display: flex; flex-wrap: wrap; gap: var(--sp-2) }
+.swatch { position: relative; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 50%; background: var(--c); cursor: pointer;
+  box-shadow: inset 0 0 0 1px #0000001f, 0 0 0 0 var(--bg), 0 0 0 0 transparent;
+  transition: box-shadow var(--hd) var(--ease-out), transform var(--pd) var(--ease-out), outline-color var(--dur-focus) var(--ease-out) }
+.swatch[aria-checked=true] { --hd: var(--dur-enter); box-shadow: inset 0 0 0 1px #0000001f, 0 0 0 2px var(--bg-ring, var(--surface)), 0 0 0 3.5px var(--text) }
+.swatch:focus-visible { outline-offset: 4px }
+.hex { position: relative; display: block; width: 148px }
+.hex .input { padding-left: 40px; font-family: var(--font-mono); font-size: var(--fs-sm); text-transform: uppercase }
+.hex .preview { transition: background-color var(--dur-enter) var(--ease-out); position: absolute; left: 8px; top: 50%; width: 20px; height: 20px; margin-top: -10px; border-radius: var(--r-xs); background: var(--c);
+  box-shadow: inset 0 0 0 1px #0000002e; overflow: hidden; cursor: pointer }
+.hex .preview input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: 0; padding: 0 }
+
+/* ============ Тег ============ */
+.tag { display: inline-flex; align-items: center; gap: 2px; height: 24px; padding: 0 2px 0 var(--sp-2); border-radius: var(--r-xs); max-width: 100%;
+  background: var(--tile); color: var(--text); font-size: var(--fs-sm); line-height: var(--lh-sm); white-space: nowrap;
+  box-shadow: inset 0 0 0 1px transparent; transition: background-color var(--dur-enter) var(--ease-out), box-shadow var(--dur-enter) var(--ease-out);
+  animation: tag-in var(--dur-enter) var(--ease-out) }
+.tag.still { animation: none }
+.tag > span { overflow: hidden; text-overflow: ellipsis }
+.tag button { display: grid; place-items: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 4px; background: none; color: var(--text-muted); cursor: pointer;
+  transition: background-color var(--hd) var(--ease-hover), color var(--hd) var(--ease-hover) }
+@media (hover: hover) and (pointer: fine) { .tag button:hover { --hd: var(--dur-hover-in); color: var(--text) } }   /* крестик ярче фона тега, своей подложки нет */
+.tag button .lucide { width: 14px; height: 14px }
+.tag.armed { background: var(--tile-strong); box-shadow: inset 0 0 0 1px var(--border-strong) }   /* Backspace один раз — подсветка, второй — удаление */
+@keyframes tag-in { from { opacity: 0; transform: scale(.94) } }
+
+/* ============ Поле с подсказками (combobox) и мультивыбор ============
+   Поле само является строкой поиска; список — тот же .listbox. Совпадение в пункте — плотнее, без подсветки фоном. */
+.combo { position: relative; display: block }
+.combo .listbox { --origin: top center }
+.option mark { background: none; color: var(--text); font-weight: var(--w-semibold) }
+.option.empty { color: var(--text-muted); pointer-events: none; justify-content: center; padding-block: var(--sp-3) }
+.option.create { color: var(--text) }
+.option.create .lucide { color: var(--text-muted) }
+/* стрелка — отдельная цель 32×32: открывает и закрывает список; при наведении ярче, без подложки */
+.combo .chev { position: absolute; right: 4px; top: 50%; display: grid; place-items: center; width: 32px; height: 32px; transform: translateY(-50%); color: var(--text-muted); cursor: pointer;
+  --hd: var(--dur-hover-out); transition: transform var(--dur-enter) var(--ease-out), color var(--hd) var(--ease-hover) }
+@media (hover: hover) and (pointer: fine) { .combo .chev:hover { color: var(--text); --hd: var(--dur-icon-in) } }
+.combo:has([aria-expanded=true]) .chev { transform: translateY(-50%) rotate(180deg) }
+.combo > .input { padding-right: 36px }
+/* мультивыбор: поле растёт по высоте, теги с отступом 6 сверху/снизу (36 = 6 + 24 + 6) */
+.multi { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1); min-height: var(--h-md); height: auto; padding: 6px 36px 6px 6px; cursor: text }
+.multi:focus-within { box-shadow: inset 0 0 0 var(--focus-width) var(--focus-field) }
+.multi input { flex: 1; min-width: 80px; height: 24px; padding: 0 6px; border: 0; background: none; color: var(--text); font: inherit; outline: none }
+.multi input::placeholder { color: var(--text-faint) }
+.option .check { pointer-events: none }
+/* одной строкой: высота всегда 36; теги сжимаются до 56px с многоточием, лишние — в «+N» (js) */
+.multi.one-line { flex-wrap: nowrap; overflow: hidden }
+.multi.one-line .tag { flex: 0 1 auto; min-width: 0; max-width: 160px }
+.multi.one-line .tag > span { min-width: 0 }
+.multi.one-line .tag button { flex: none }
+.multi.one-line input { flex: 1 0 64px; min-width: 64px }
+.tag[hidden], .tag-more[hidden] { display: none }
+.tag-more { flex: none; display: inline-grid; place-items: center; min-width: 32px; height: 24px; padding: 0 var(--sp-2); border-radius: var(--r-xs); cursor: pointer;
+  background: var(--tile); color: var(--text-muted); font-size: var(--fs-sm); line-height: var(--lh-sm); font-variant-numeric: tabular-nums; white-space: nowrap;
+  transition: color var(--dur-hover-out) var(--ease-hover), background-color var(--dur-enter) var(--ease-out), box-shadow var(--dur-enter) var(--ease-out) }
+@media (hover: hover) and (pointer: fine) { .tag-more:hover { color: var(--text); transition-duration: var(--dur-hover-in) } }
+.tag-more.armed { background: var(--tile-strong); box-shadow: inset 0 0 0 1px var(--border-strong) }        /* в мультивыборе у всех пунктов есть флажок — дыры нет */
+
+/* ============ Выбор даты ============
+   Поле-кнопка с иконкой календаря; панель — месяц сеткой 7×6, неделя с понедельника.
+   Выбранный день — как основная кнопка (инверсия), сегодня — точка под числом, диапазон — сплошная полоса между краями. */
+.date { position: relative; display: block }
+.date-trigger { display: flex; align-items: center; gap: var(--sp-2); text-align: left; cursor: pointer; padding-left: var(--sp-3) }
+.date-trigger > .lucide { color: var(--text-muted); flex: none }
+.date-trigger > .value { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums }
+.date-trigger > .value.placeholder { color: var(--text-faint) }
+.date-trigger[aria-expanded=true] { box-shadow: inset 0 0 0 var(--focus-width) var(--focus-field) }
+.date-trigger:focus-visible { outline: none; box-shadow: inset 0 0 0 var(--focus-width) var(--focus-field) }
+.cal-pop { top: calc(100% + var(--sp-1)); left: 0; min-width: 0; padding: var(--sp-3); display: flex; gap: var(--sp-4); border-radius: var(--r-lg) }
+.cal-pop.up { top: auto; bottom: calc(100% + var(--sp-1)); --origin: bottom left }
+.cal-pop.right { left: auto; right: 0; --origin: top right }
+.cal-presets { display: grid; align-content: start; gap: 2px; width: 168px; padding-right: var(--sp-3); box-shadow: 1px 0 0 var(--border-subtle) }
+.cal-presets .menu-item { padding-block: 6px; white-space: nowrap }
+.cal-presets .menu-item[aria-pressed=true] { background: var(--fill); color: var(--text); font-weight: var(--w-medium) }
+.cal-months { display: flex; gap: var(--sp-6) }
+.cal { width: 252px }                     /* 7 × 36 */
+.cal-head { display: flex; align-items: center; justify-content: space-between; height: 32px; margin-bottom: var(--sp-2) }
+.cal-title { font-size: var(--fs-sm); line-height: var(--lh-sm); font-weight: var(--w-medium); color: var(--text); text-transform: capitalize }
+.cal-head .spacer { width: 32px }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 36px); row-gap: 2px }
+.cal-wd { height: 28px; display: grid; place-items: center; font-size: var(--fs-xs); line-height: var(--lh-xs); color: var(--text-muted) }
+.cal-cell { position: relative; height: 36px; display: grid; place-items: center }
+/* полоса диапазона — в ячейке, на всю ширину; у краёв — половина, чтобы концы были скруглены днём */
+.cal-cell::before { content: ""; position: absolute; inset: 2px 0; background: var(--tile); opacity: 0;
+  transition: opacity var(--dur-enter) var(--ease-out), left var(--dur-enter) var(--ease-out), right var(--dur-enter) var(--ease-out) }
+.cal-cell:is(.in, .from, .to)::before { opacity: 1 }
+.cal-cell.from::before { left: 50% }
+.cal-cell.to::before { right: 50% }
+.cal-cell.from.to::before { opacity: 0 }
+.cal-months.instant *, .cal-months.instant *::before, .cal-months.instant *::after { transition: none !important }
+.cal-cell.in:nth-child(7n+1)::before, .cal-cell.to:nth-child(7n+1)::before { left: 2px; border-radius: var(--r-sm) 0 0 var(--r-sm) }
+.cal-cell.in:nth-child(7n)::before, .cal-cell.from:nth-child(7n)::before { right: 2px; border-radius: 0 var(--r-sm) var(--r-sm) 0 }
+.cal-day { position: relative; z-index: 1; width: 32px; height: 32px; padding: 0; border: 0; border-radius: var(--r-sm); background: none; cursor: pointer;
+  font: inherit; font-size: var(--fs-sm); line-height: 1; color: var(--text-secondary); font-variant-numeric: tabular-nums;
+  transition: background-color var(--hd) var(--ease-hover), color var(--hd) var(--ease-hover), transform var(--pd) var(--ease-out), outline-color var(--dur-focus) var(--ease-out) }
+@media (hover: hover) and (pointer: fine) { .cal-day:hover { background: var(--tile); color: var(--text) } }
+.cal-day.out { color: var(--text-faint) }
+.cal-day.today::after { transition: background-color var(--dur-enter) var(--ease-out); content: ""; position: absolute; left: 50%; bottom: 5px; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--accent) }
+.cal-day[aria-selected=true] { --hd: var(--dur-enter); background: var(--invert); color: var(--invert-fg); font-weight: var(--w-medium) }
+.cal-day[aria-selected=true].today::after { background: var(--invert-fg) }
+.cal-day:disabled { color: var(--text-faint); opacity: .5; pointer-events: none }
+.cal-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); margin-top: var(--sp-3); padding-top: var(--sp-3); box-shadow: 0 -1px 0 var(--border-subtle) }
+.cal-foot .hint { font-variant-numeric: tabular-nums }
+.cal-body { display: grid }
+/* смена месяца: старый уходит, новый приходит со сдвигом 8px по направлению */
+.cal-months.slide-l { animation: cal-l var(--dur-enter) var(--ease-out) }
+.cal-months.slide-r { animation: cal-r var(--dur-enter) var(--ease-out) }
+@keyframes cal-l { from { opacity: 0; transform: translateX(-8px) } }
+@keyframes cal-r { from { opacity: 0; transform: translateX(8px) } }
+
+/* ============ Загрузка файлов ============
+   Зона: пунктир, иконка, текст и ограничения; при перетаскивании — сплошная рамка акцентом и тинт.
+   Файлы — список строк 52px: тип, имя (обрезается), размер, прогресс или статус, удалить. */
+.dz { position: relative; display: grid; justify-items: center; gap: var(--sp-2); padding: var(--sp-8) var(--sp-6); border-radius: var(--r-lg); text-align: center; cursor: pointer;
+  background: var(--fill); color: var(--text-muted); font-size: var(--fs-sm); line-height: var(--lh-sm);
+  border: 1px dashed color-mix(in srgb, var(--text) 22%, transparent);
+  transition: background-color var(--hd) var(--ease-hover), border-color var(--hd) var(--ease-hover), outline-color var(--dur-focus) var(--ease-out) }
+@media (hover: hover) and (pointer: fine) { .dz:hover { background-color: var(--fill-hover); border-color: color-mix(in srgb, var(--text) 34%, transparent) } }
+.dz .dz-ic { display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--r-md); background: var(--surface-strong); color: var(--text-secondary);
+  box-shadow: inset 0 0 0 1px var(--border); transition: transform var(--dur-state) var(--ease-out) }
+.dz b { color: var(--text); font-weight: var(--w-medium) }
+.dz u { text-decoration: underline 1px; text-underline-offset: 3px; text-decoration-color: color-mix(in srgb, currentColor 50%, transparent) }
+.dz input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none }
+.dz.over { --hd: var(--dur-hover-in); background-color: var(--accent-tint); border-color: var(--accent); border-style: solid; color: var(--accent-text) }
+.dz.over .dz-ic { transform: translateY(-2px) }
+.files { display: grid; margin: calc(var(--sp-2) * -1) 0 0; padding: 0; list-style: none }   /* зазор — margin-top строки: уходит вместе с ней, без скачка */
+.file { display: grid; grid-template-columns: 32px 1fr auto; align-items: center; gap: var(--sp-3); padding: var(--sp-2) var(--sp-2) var(--sp-2) var(--sp-3);
+  margin-top: var(--sp-2); border-radius: var(--r-md); background: var(--surface); box-shadow: inset 0 0 0 1px var(--border-subtle) }
+.file-ic { display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--r-sm); background: var(--tile); color: var(--text-muted);
+  transition: background-color var(--dur-state) var(--ease-out), color var(--dur-state) var(--ease-out) }
+.file-main { display: grid; gap: 6px; min-width: 0 }
+.file-row { display: flex; align-items: baseline; gap: var(--sp-2); min-width: 0; font-size: var(--fs-sm); line-height: var(--lh-sm) }
+.file-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text) }
+.file-meta { flex: none; color: var(--text-muted); font-variant-numeric: tabular-nums }
+.file .progress { height: 2px }
+.file.done .progress, .file.error .progress { display: none }
+.file.done .file-ic { background: var(--success-tint); color: var(--success-text) }
+.file.error { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--danger) 30%, transparent) }
+.file.error .file-ic { background: var(--danger-tint); color: var(--danger-text) }
+.file.error .file-meta { color: var(--danger-text) }
+
+/* ============ Телефон: цели касания ≥ 40 ============ */
+@media (pointer: coarse) {
+  .stepper button { width: 36px; height: 36px }
+  .stepper { height: var(--h-touch); padding: 0 4px }
+  .tgl button { min-width: 36px; height: 36px }
+  .swatch { width: 32px; height: 32px }
+  .cal { width: 280px }
+  .cal-grid { grid-template-columns: repeat(7, 40px) }
+  .cal-cell { height: 40px }
+  .cal-day { width: 36px; height: 36px }
+  .slider, .slider-scale { --th: 24px }
+}
+@media (max-width: 640px) {
+  .cal-pop { flex-direction: column; gap: var(--sp-3); left: 0; right: auto }
+  /* пресеты — одна строка с прокруткой вбок, без лесенки */
+  .cal-presets { width: 0; min-width: calc(100% + var(--sp-3) * 2); display: flex; gap: var(--sp-1); margin: 0 calc(var(--sp-3) * -1); padding: 0 var(--sp-3) var(--sp-3); overflow-x: auto; scrollbar-width: none; box-shadow: inset 0 -1px 0 var(--border-subtle) }
+  .cal-presets::-webkit-scrollbar { display: none }
+  .cal-presets .menu-item { width: auto; flex: none; background: var(--fill) }
+  .cal-presets .menu-item[aria-pressed=true] { background: var(--tile-strong) }
+  /* подвал: итог — строкой сверху, кнопки — справа в ряд */
+  .cal-foot { flex-wrap: wrap; row-gap: var(--sp-3) }
+  .cal-foot .hint { flex: 1 1 100% }
+  .cal-foot .btn-row { margin-left: auto; flex-wrap: nowrap }
+  .cal-months > .cal:nth-child(2) { display: none }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .otp.shake, .cal-months.slide-l, .cal-months.slide-r { animation-name: fade-in }
+  .dz.over .dz-ic { transform: none }
+  @keyframes fade-in { from { opacity: .4 } }
+}

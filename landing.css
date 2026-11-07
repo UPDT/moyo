@@ -1,0 +1,211 @@
+/* Лендинг Moyo: только раскладка этой страницы; общее для страниц сайта — в site.css. Цвета, шрифты, отступы и компоненты — из токенов системы. */
+html { -webkit-tap-highlight-color: transparent }
+
+/* ---------- Первый экран ---------- */
+.hero { position: relative; display: grid; align-items: center; min-height: calc(100svh - 72px); padding: var(--sp-16) 0; overflow: clip }
+.hero .wrap { position: relative; width: 100% }
+.hero-top { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--sp-12); align-items: center }
+.hero-tx { display: grid; justify-items: start; gap: var(--sp-6) }
+.hero-title { font-size: var(--fs-4xl); line-height: var(--lh-4xl); letter-spacing: var(--ls-4xl); font-weight: var(--w-medium); text-wrap: balance }
+.hero-lead { max-width: 536px; font-size: var(--fs-md); line-height: var(--lh-md); letter-spacing: var(--ls-md); color: var(--text-muted); text-wrap: pretty }
+.hero-cta { display: flex; flex-wrap: wrap; gap: var(--sp-3); margin-top: var(--sp-2) }
+
+/* ---------- Сцена первого экрана: доска в перспективе, камни ставятся по одному, телефон над доской распознаёт ход ----------
+   Объём: у доски грани, у камня — тело из двух дисков (ребро и верх) и отдельная тень на доске, которая собирается, пока камень опускается.
+   Камера медленно дрейфует, свет на доске стоит на месте (ездит против дрейфа). Всё движение — transform и opacity. */
+.hs { position: relative; width: 100%; max-width: 600px; aspect-ratio: 1; justify-self: end; container-type: inline-size; pointer-events: none; user-select: none }
+.hs-stage { position: absolute; inset: 0; perspective: 250cqw; perspective-origin: 50% 20% }
+.hs-board { --t: 5cqw; position: absolute; left: 6%; top: 27%; width: 66%; aspect-ratio: 1; transform-style: preserve-3d;
+  transform: rotateX(54deg) rotateZ(-30deg); animation: hs-cam 16s ease-in-out infinite alternate }
+@keyframes hs-cam { to { transform: rotateX(50deg) rotateZ(-23deg) } }
+.hs-top { position: absolute; inset: 0; width: 100%; height: 100% }
+.hs-grain { opacity: .55 }
+.hs-light { position: absolute; inset: 0; overflow: hidden; transform: translateZ(.02px) }
+.hs-light i { position: absolute; left: -50%; top: -50%; width: 200%; height: 200%; display: block;
+  background: radial-gradient(circle at 42% 40%, #fff3dc59, #fff3dc1a 22%, transparent 42%), radial-gradient(circle at 70% 75%, #0000001f, transparent 40%);
+  animation: hs-sheen 16s ease-in-out infinite alternate }
+@keyframes hs-sheen { to { transform: rotate(7deg) translate(2%, -3%) } }
+.hs-side { position: absolute; display: block; backface-visibility: hidden;
+  background: repeating-linear-gradient(90deg, #0000 0 7px, #5a36100f 7px 9px, #0000 9px 19px), #b9843f }
+.hs-sb { left: 0; top: 100%; width: 100%; height: var(--t); transform-origin: 50% 0; transform: rotateX(-90deg);
+  background: repeating-linear-gradient(90deg, #0000 0 11px, #5a361014 11px 13px, #0000 13px 23px), linear-gradient(#c99552, #9a682d) }
+.hs-stp { left: 0; bottom: 100%; width: 100%; height: var(--t); transform-origin: 50% 100%; transform: rotateX(90deg) }
+.hs-sr { top: 0; left: 100%; width: var(--t); height: 100%; transform-origin: 0 50%; transform: rotateY(90deg);
+  background: repeating-linear-gradient(0deg, #0000 0 9px, #3a20081a 9px 11px, #0000 11px 21px), linear-gradient(90deg, #a87436, #855a26) }
+.hs-sl { top: 0; right: 100%; width: var(--t); height: 100%; transform-origin: 100% 50%; transform: rotateY(-90deg);
+  background: repeating-linear-gradient(0deg, #0000 0 9px, #3a200814 9px 11px, #0000 11px 21px), linear-gradient(90deg, #8f6129, #b58040) }
+/* тень доски — под доской в её плоскости, мягкая и прижатая */
+.hs-board::before { content: ""; position: absolute; inset: 5%; transform: translateZ(calc(var(--t) * -1 - 2px)); border-radius: 8%;
+  background: #000; opacity: .32; filter: blur(16px) }
+
+/* камень: тень на доске (.sh) + тело (.bd) из ребра (.ed) и верха (.fc) */
+.hs-stones { position: absolute; inset: 0; transform-style: preserve-3d }
+.hs-stn { position: absolute; left: var(--x); top: var(--y); width: 9.6%; aspect-ratio: 1; margin: -4.8% 0 0 -4.8%; transform-style: preserve-3d }
+.hs-stn .sh { position: absolute; inset: -14%; border-radius: 50%; transform: translate(9%, 11%) translateZ(.05px);
+  background: radial-gradient(closest-side, #0000008c, #00000059 55%, #0000 100%); opacity: 0 }
+.hs-stn .bd { position: absolute; inset: 0; transform-style: preserve-3d }   /* без opacity: прозрачность у preserve-3d сплющивает камень */
+.hs-stn .ed, .hs-stn .fc { position: absolute; inset: 0; border-radius: 50%; opacity: 0 }
+.hs-stn .ed { transform: translateZ(.35cqw) }
+.hs-stn .fc { transform: translateZ(.85cqw) }
+.hs-stn.b .ed { background: #0b0a09 }
+.hs-stn.w .ed { background: #b9b3a6 }
+.hs-stn.b .fc { background: radial-gradient(circle at 36% 32%, #77746d, #2a2926 34%, #121110 70%, #0b0a09) }
+.hs-stn.w .fc { background: radial-gradient(circle at 36% 32%, #ffffff, #f4f1ea 38%, #e2ddd2 72%, #cfc9bd) }
+.hs-stn.on .sh { opacity: 1 }
+.hs-stn.on .ed, .hs-stn.on .fc { opacity: 1 }
+
+/* камни в воздухе вокруг доски: ближние крупнее и плотнее, дальние мельче и тише */
+.hs-f { position: absolute; display: block; aspect-ratio: 1; border-radius: 50%; box-shadow: 0 .8cqw 1.6cqw #00000033;
+  animation: hs-float var(--d, 8s) ease-in-out var(--dl, 0s) infinite alternate }
+.hs-f.b { background: radial-gradient(circle at 36% 30%, #77746d, #2a2926 34%, #121110 70%, #0b0a09); box-shadow: 0 .8cqw 1.6cqw #00000033, inset 0 -.5cqw .4cqw #000 }
+.hs-f.w { background: radial-gradient(circle at 36% 30%, #ffffff, #f4f1ea 38%, #e2ddd2 72%, #cfc9bd); box-shadow: 0 .8cqw 1.6cqw #00000029, inset 0 -.5cqw .4cqw #b9b3a6 }
+.hs-f1 { left: 3%; top: 10%; width: 7%; --d: 9s; transform: rotate(-20deg) scaleY(.62) }
+.hs-f2 { left: 22%; top: 5%; width: 3.6%; opacity: .5; --d: 11s; --dl: -3s; transform: scaleY(.6) }
+.hs-f3 { left: 84%; top: 86%; width: 5%; opacity: .75; --d: 10s; --dl: -5s; transform: rotate(14deg) scaleY(.6) }
+.hs-f4 { left: 3%; top: 86%; width: 8.4%; --d: 8s; --dl: -2s; transform: rotate(18deg) scaleY(.6) }
+.hs-f5 { left: 60%; top: 94%; width: 3%; opacity: .45; --d: 12s; --dl: -7s; transform: scaleY(.6) }
+@keyframes hs-float { to { translate: 0 -2.2cqw } }
+
+/* телефон над доской: смотрит на неё камерой, на экране та же позиция; стекло с бликом, вырез камеры */
+.hs-phone { position: absolute; right: 1%; top: 1%; width: 37%; aspect-ratio: 9 / 15.5; padding: 1.2cqw; border-radius: 6.2cqw;
+  background: linear-gradient(140deg, color-mix(in oklch, var(--text) 22%, var(--bg)), color-mix(in oklch, var(--text) 10%, var(--bg)) 60%);
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--text) 24%, transparent), inset 0 0 0 .5cqw color-mix(in oklch, var(--text) 6%, transparent), 0 3cqw 6cqw -2cqw #00000066;
+  rotate: 7deg; animation: hs-float 9s ease-in-out -4s infinite alternate }
+.hs-phone::after { content: ""; position: absolute; inset: 1.2cqw; border-radius: 5cqw; pointer-events: none;
+  background: linear-gradient(118deg, #ffffff12 0 26%, #ffffff00 26.5%) }
+.hp-screen { position: relative; display: grid; grid-template-rows: auto auto 1fr; gap: 3cqw; height: 100%; padding: 5.4cqw 2.8cqw 2.8cqw; border-radius: 5cqw; background: var(--bg-raised); overflow: hidden }
+.hp-island { position: absolute; left: 50%; top: 1.4cqw; width: 9cqw; height: 2.4cqw; margin-left: -4.5cqw; border-radius: 99px; background: #000 }
+.hp-top { display: flex; align-items: center; justify-content: space-between; font-size: 2.6cqw; line-height: 1.3; color: var(--text-muted); white-space: nowrap }
+.hp-rec { display: inline-flex; align-items: center; gap: 1.2cqw; color: var(--text) }
+.hp-rec i { display: block; width: 1.6cqw; height: 1.6cqw; border-radius: 50%; background: var(--danger); animation: hp-blink 1.6s ease-in-out infinite alternate }
+@keyframes hp-blink { to { opacity: .35 } }
+.hp-n { font-weight: var(--w-medium); color: var(--accent-text); font-variant-numeric: tabular-nums }
+.hp-board { display: block; width: 100%; border-radius: 1.4cqw }
+.hp-stones circle { opacity: 0; transform: scale(.6); transform-box: fill-box; transform-origin: center; transition: opacity 260ms var(--ease-out), transform 320ms var(--ease-out) }
+.hp-stones circle.b { fill: #1b1a18 }
+.hp-stones circle.w { fill: #f6f3ec; stroke: #00000033; stroke-width: 1 }
+.hp-stones circle.on { opacity: 1; transform: none }
+.hs.clr .hp-stones circle, .hs.clr .hp-last { transition: opacity 700ms var(--ease-in-out), transform 0s 700ms }
+.hp-last { fill: none; stroke: var(--danger); stroke-width: 2.4; opacity: 0; transition: transform 300ms var(--ease-out), opacity 240ms var(--ease-out) }
+.hp-last.on { opacity: 1 }
+.hp-focus { fill: none; stroke: #2fbf71; stroke-width: 2.2; stroke-linecap: round; opacity: 0 }
+.hp-move { align-self: end; display: grid; gap: .6cqw; padding: 2.4cqw 2.8cqw; border-radius: 3cqw; background: var(--bg); font-size: 2.5cqw; line-height: 1.3; color: var(--text-muted); white-space: nowrap }
+.hp-move b { font-size: 3.3cqw; font-weight: var(--w-medium); color: var(--text) }
+
+.hs.paused .hs-f, .hs.paused .hs-phone, .hs.paused .hp-rec i, .hs.paused .hs-board, .hs.paused .hs-light i { animation-play-state: paused }
+@media (prefers-reduced-motion: reduce) { .hs-f, .hs-phone, .hp-rec i, .hs-board, .hs-light i { animation: none } }
+
+/* ---------- Возможности: вещи Moyo в сценах плиток ---------- */
+.vz-cam { display: grid; gap: var(--sp-3) }
+.vc-top { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3) }
+.vc-move { font-size: var(--fs-sm); line-height: var(--lh-sm); font-weight: var(--w-medium); font-variant-numeric: tabular-nums }
+.goban { display: block; width: 100%; height: auto }
+.gb-wood { fill: #dcaa62 }
+.gb-lines path { stroke: #3a2810; stroke-width: 1; fill: none; opacity: .7 }
+.gb-star circle { fill: #3a2810 }
+.gb-b circle { fill: #1b1a18 }
+.gb-w circle { fill: #f6f3ec; stroke: #00000033; stroke-width: 1 }
+.gb-last { fill: none; stroke: #f6f3ec; stroke-width: 1.5 }
+.vi-t { font-size: var(--fs-sm); line-height: var(--lh-sm); color: var(--text-muted); font-variant-numeric: tabular-nums; white-space: nowrap }
+
+.vz-chart { display: grid; gap: var(--sp-2); padding: var(--sp-3) var(--sp-4) var(--sp-2) }
+.vch-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); font-size: var(--fs-sm); line-height: var(--lh-sm); color: var(--text-muted) }
+.vch-head b { font-weight: var(--w-medium); white-space: nowrap }
+.vz-chart .chart { pointer-events: none }
+
+.vz-why { display: grid; padding: var(--sp-4) }
+.vw-t { padding-bottom: var(--sp-2); font-size: var(--fs-md); line-height: var(--lh-md); font-weight: var(--w-medium) }
+.vw-best { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); min-height: 44px; font-size: var(--fs-sm); line-height: var(--lh-sm); color: var(--text-muted) }
+.vw-best b { font-weight: var(--w-semibold); font-family: var(--font-mono) }
+
+.vz-prob { display: grid; gap: var(--sp-2); padding: var(--sp-4) }
+.vp-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); font-size: var(--fs-sm); line-height: var(--lh-sm); color: var(--text-muted) }
+.vp-head b { font-size: var(--fs-md); line-height: var(--lh-md); font-weight: var(--w-medium); color: var(--text) }
+.vz-prob .progress { margin-bottom: var(--sp-1) }
+.vz-prob .vz-row:last-child { box-shadow: none }
+
+/* ---------- Цена ---------- */
+.price { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: var(--sp-16); align-items: center }
+.price-tx { display: grid; gap: var(--sp-3) }
+.price-tx p { margin-top: var(--sp-2); max-width: var(--measure-narrow); color: var(--text-muted); text-wrap: pretty }
+.price-card { display: grid; gap: var(--sp-6); padding: var(--sp-8); border-radius: var(--r-xl); background: var(--bg-raised); box-shadow: inset 0 0 0 1px var(--border) }
+.pc-group { display: grid; gap: var(--sp-3) }
+.pc-group + .pc-group { padding-top: var(--sp-6); box-shadow: inset 0 1px 0 var(--border-subtle) }
+.pc-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); font-size: var(--fs-lg); line-height: var(--lh-lg); font-weight: var(--w-medium) }
+.price-card .ticks { margin: 0 }
+
+
+/* ---------- Ширины ---------- */
+@media (max-width: 1100px) {
+  .price { grid-template-columns: minmax(0, 1fr) 380px; gap: var(--sp-8) }
+}
+@media (max-width: 1180px) {
+  .hero-top { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); column-gap: var(--sp-8) }
+}
+@media (max-width: 960px) {
+  .hero { min-height: 0; padding: var(--sp-12) 0 var(--sp-8) }
+  .hero-top { grid-template-columns: minmax(0, 1fr); row-gap: var(--sp-12) }
+  .hs { justify-self: center; max-width: 520px }
+}
+@media (max-width: 860px) {
+  .price { grid-template-columns: minmax(0, 1fr); gap: var(--sp-8) }
+}
+@media (max-width: 520px) {
+  /* шапки вещей в узкой сцене: название над значением, без переносов внутри */
+  .vch-head, .vp-head { flex-direction: column; align-items: flex-start; gap: 2px }
+  .vch-head span, .vp-head span, .vp-head b { white-space: nowrap }
+  .vz-why .vz-row > :first-child { white-space: normal; overflow: visible }
+  .price-card { padding: var(--sp-6) var(--sp-5) }
+}
+
+/* ---------- Возможности: четыре ряда «текст + вещь»; третий ряд зеркальный, разбор — во всю ширину, текст над демо ----------
+   Сцена вещи — системная .tile-stage с плотным полем (пользователь: «слишком много воздуха»). */
+.ft-list { display: grid; gap: var(--sp-16) }
+.ft { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: var(--sp-12); row-gap: var(--sp-6); align-items: center }
+.ft:nth-child(even) { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr) }
+.ft:nth-child(even) .ft-tx { order: 2 }
+.ft-tx { display: grid; gap: var(--sp-3); align-content: center }
+.ft-tx h3 { font-size: var(--fs-2xl); line-height: var(--lh-2xl); letter-spacing: var(--ls-2xl); font-weight: var(--w-medium); text-wrap: balance }
+.ft-tx p { max-width: var(--measure-narrow); color: var(--text-muted); text-wrap: pretty }
+.ft-viz { padding: var(--sp-8) var(--sp-6); border-radius: var(--r-xl); box-shadow: inset 0 0 0 1px var(--border) }
+.ft .vz-row, .ft .vw-best { min-height: 36px }   /* строки внутри вещей — не кнопки */
+.ft :is(.vz-prob, .vz-why) { padding: var(--sp-3) var(--sp-4) }
+@media (max-width: 1100px) { .ft-tx h3 { font-size: var(--fs-xl); line-height: var(--lh-xl); letter-spacing: var(--ls-xl) } }
+.hero-note { margin-top: calc(var(--sp-3) * -1); font-size: var(--fs-sm); line-height: var(--lh-sm); color: var(--text-faint) }
+@media (max-width: 860px) {
+  .ft, .ft:nth-child(even) { grid-template-columns: minmax(0, 1fr) }
+  .ft:nth-child(even) .ft-tx { order: 0 }
+  .ft-viz { min-height: 0 }
+  .ft-list { gap: var(--sp-12) }
+}
+
+/* Moyo в заголовке — цветом дерева доски (выбор пользователя): единственный цвет страницы, связывает заголовок со сценой.
+   В светлой теме дерево темнее, иначе крупный текст на белом не дотягивает до 3:1 */
+.hero-brand { background: linear-gradient(100deg, #e2b46c, #b9823c 55%, #d9a75e); -webkit-background-clip: text; background-clip: text; color: transparent }
+:root[data-theme="light"] .hero-brand { background-image: linear-gradient(100deg, #b07a33, #8a5a22 55%, #a8722e) }
+
+
+
+
+/* ---------- Материалы камней на блоках (выбор пользователя: «пара») ----------
+   Ряды возможностей чередуются как ходы: сланец (чёрные камни), раковина (белые), карточка цены — раковина.
+   Текстуры — img/slate.svg и img/shell.svg: шум с рельефным освещением, тайл бесшовный. Сверху мягкий блик, как свет на камне. */
+:root {
+  --slate: radial-gradient(110% 80% at 18% 0%, #ffffff12, transparent 55%), url(img/slate.svg) center / 800px 560px, #121315;
+  --shell: radial-gradient(100% 70% at 22% 0%, #ffffffb3, transparent 60%), url(img/shell.svg) center / 800px 560px, #f2eee6;
+}
+.ft:nth-child(odd) .ft-viz { background: var(--slate); box-shadow: inset 0 0 0 1px #ffffff12, inset 0 1px 0 #ffffff17 }
+:is(.ft:nth-child(even) .ft-viz, .price-card) { background: var(--shell); box-shadow: inset 0 0 0 1px #6b5a3a1a, inset 0 1px 0 #ffffff, 0 1px 2px #0000000d;
+  --bg: #f4f1eb; --bg-raised: #ece8e0; --surface: #fbfaf7; --surface-hover: #efebe4; --surface-active: #e8e4dc; --surface-strong: #e2ddd4;
+  --border-subtle: #2a26200f; --border: #2a26201c; --border-strong: #2a26202e;
+  --text: #22201c; --text-secondary: #3b3832; --text-muted: #6b675f; --text-faint: #8a857c;
+  --invert: #22201c; --invert-hover: #090909; --invert-fg: #ffffff; --accent: var(--invert); --accent-fg: var(--invert-fg); --accent-text: var(--text); --accent-tint: var(--surface-strong);
+  color: var(--text) }
+/* сланцевым блокам — тёмные токены и в светлой теме: вещи внутри остаются на камне */
+.ft:nth-child(odd) .ft-viz {
+  --bg: #0d0d0e; --bg-raised: #141415; --surface: #18181a; --surface-hover: #1d1d1f; --surface-active: #202022; --surface-strong: #262628;
+  --border-subtle: #ffffff0d; --border: #ffffff17; --border-strong: #ffffff26;
+  --text: #f8f8f8; --text-secondary: #d5d5d5; --text-muted: #8f8f8f; --text-faint: #6c6c6c;
+  --invert: #f8f8f8; --invert-hover: #d9d9d9; --invert-fg: #090909; --accent: var(--invert); --accent-fg: var(--invert-fg); --accent-text: var(--text); --accent-tint: var(--surface-strong);
+  color: var(--text) }
+.ft-viz::before { display: none }

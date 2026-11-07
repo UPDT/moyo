@@ -1,0 +1,662 @@
+/* Компоненты · Supabase-структура, Linear-цвета, движение — наше
+   Требует: colors.css, motion.css, type.css, space.css, icons.css.
+   Правила, общие для всех:
+   - высота кратна 4: 32 / 36 / 40 / 44; кнопка и поле одного размера совпадают в ряду
+   - состояния: покой → hover (150 мс пришёл, 300 ушёл) → нажатие (80/250) → фокус (контур, без свечения)
+     → отключено (без hover, без нажатия) → ошибка/загрузка, где применимо
+   - семантика сохраняется во всех состояниях: опасное остаётся красным и при наведении
+   - фон внутри панелей при наведении — полупрозрачный цвет текста (--tile), а не следующий слой
+   - разделители не упираются в края контейнера */
+
+/* текст только для читалки экрана: подпись иконки-значения («Есть», «Нет»), скрытый заголовок страницы */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0 }
+
+:root, [data-theme] {
+  --tile: color-mix(in srgb, var(--text) 6%, transparent);
+  --tile-strong: color-mix(in srgb, var(--text) 9%, transparent);
+  --fill: color-mix(in srgb, var(--text) 4%, transparent);
+  --fill-hover: color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+/* Асимметричные микро-реакции: базовое правило задаёт «уход», :hover/:active — «приход» */
+:where(.btn, .icon-btn, .input, .textarea, .select, .check, .radio, .switch, .seg button, .tab, .menu-item, .card-link, .tr-link, .chip) {
+  --hd: var(--dur-hover-out); --pd: var(--dur-press-out);
+}
+@media (hover: hover) and (pointer: fine) { :where(.btn, .icon-btn, .input, .textarea, .select, .check, .radio, .switch, .seg button, .tab, .menu-item, .card-link, .tr-link, .chip):hover { --hd: var(--dur-hover-in) } }
+:where(.btn, .icon-btn, .check, .radio, .switch, .chip):active { --pd: var(--dur-press-in) }
+
+/* Фокус с клавиатуры: контур есть всегда, но прозрачный — цвет проявляется плавно */
+:where(.btn, .icon-btn, .check, .radio, .switch, .seg button, .tab, .link, .card-link, .chip) {
+  outline: var(--focus-outline) solid transparent; outline-offset: var(--focus-offset);
+}
+:where(.btn, .icon-btn, .check, .radio, .switch, .seg button, .tab, .link, .card-link, .chip):focus-visible { outline-color: var(--focus) }
+
+/* ============ Кнопка ============ */
+.btn {
+  position: relative; display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2);
+  height: var(--h-md); padding: 0 var(--sp-4); border: 0; border-radius: var(--r-md);
+  font: inherit; font-size: var(--fs-base); line-height: var(--lh-base); letter-spacing: var(--ls-base); font-weight: var(--w-medium);
+  white-space: nowrap; text-decoration: none; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--hd) var(--ease-hover), color var(--hd) var(--ease-hover), box-shadow var(--hd) var(--ease-hover),
+              outline-color var(--dur-focus) var(--ease-out), transform var(--pd) var(--ease-out);
+}
+.btn .lucide { margin-inline: -2px }          /* оптически: иконка 16 в кнопке выглядит шире текста */
+.btn-sm { height: var(--h-sm); padding: 0 var(--sp-3); border-radius: var(--r-sm);
+          font-size: var(--fs-sm); line-height: var(--lh-sm); letter-spacing: var(--ls-sm) }
+.btn-lg { height: var(--h-lg); padding: 0 var(--sp-5) }
+/* xl — только для главного действия первого экрана и финального призыва (не больше двух на экран); текст на ступень крупнее */
+.btn-xl { height: var(--h-xl); padding: 0 var(--sp-6); font-size: var(--fs-md); line-height: var(--lh-md); letter-spacing: var(--ls-md) }
+.btn-touch { height: var(--h-touch); padding: 0 var(--sp-5); font-size: var(--fs-md); line-height: var(--lh-md); letter-spacing: var(--ls-md) }
+.btn-block { display: flex; width: 100% }
+
+/* Основная на тёмной теме — светлая (как у Linear/Vercel); глубина — слоистые inset-тени (Supabase) */
+.btn-primary   { background: var(--invert); color: var(--invert-fg); box-shadow: inset 0 1px 0 #ffffff1a, 0 1px 3px #00000033 }
+@media (hover: hover) and (pointer: fine) { .btn-primary:hover { background: var(--invert-hover) } }
+/* Акцентная — одна на экран, для целевого действия */
+.btn-accent    { background: var(--accent); color: var(--accent-fg); box-shadow: inset 0 1px 0 #ffffff26, inset 0 0 0 1px #ffffff14, 0 1px 3px #00000033 }
+@media (hover: hover) and (pointer: fine) { .btn-accent:hover { background: var(--accent-hover) } }
+/* Вторичная — полупрозрачная заливка + кольцо */
+.btn-secondary { background: var(--fill); color: var(--text); box-shadow: inset 0 0 0 1px var(--border) }
+@media (hover: hover) and (pointer: fine) { .btn-secondary:hover { background: var(--fill-hover); box-shadow: inset 0 0 0 1px var(--border-strong) } }
+/* Тихая — без рамки, фон только при наведении */
+.btn-ghost     { background: transparent; color: var(--text-secondary) }
+@media (hover: hover) and (pointer: fine) { .btn-ghost:hover { background: var(--tile); color: var(--text) } }
+/* Опасная — плоская (тинт) во всех состояниях: при наведении тинт и кольцо плотнее, но не сплошная.
+   Правило: вид варианта не меняется от состояния — плоская остаётся плоской, сплошная сплошной */
+.btn-danger    { background: var(--danger-tint); color: var(--danger-text); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--danger) 28%, transparent) }
+@media (hover: hover) and (pointer: fine) { .btn-danger:hover { background: color-mix(in srgb, var(--danger) 10%, var(--danger-tint)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--danger) 48%, transparent) } }
+
+/* Отключена: без hover и нажатия, читается, но не зовёт */
+.btn:is(:disabled, [aria-disabled=true]) { opacity: .45; cursor: not-allowed; transform: none; pointer-events: none }
+/* Загрузка: ширина не меняется — содержимое гаснет и чуть уходит вниз, по центру проявляется индикатор (растёт из .6).
+   Вращение — отдельным свойством `rotate`, проявление — `transform: scale`: они не мешают друг другу, поэтому индикатор
+   действительно вырастает, а не появляется сразу. После загрузки (.is-settling, ставит btnLoading) он продолжает
+   вращаться, пока гаснет, — не замирает. Индикатор 14px, штрих 2px: дуга на бледном кольце */
+.btn > * { transition: opacity var(--dur-enter) var(--ease-out), transform var(--dur-state) var(--ease-out) }
+.btn.is-loading { color: transparent !important; pointer-events: none; --hd: var(--dur-enter) }
+.btn.is-loading > * { opacity: 0; transform: translateY(4px) scale(.96); transition-duration: var(--dur-exit), var(--dur-enter) }
+.btn::after {
+  content: ""; position: absolute; inset: 0; margin: auto; width: 14px; height: 14px; box-sizing: border-box; border-radius: 50%; pointer-events: none; --sc: var(--spin, currentColor);
+  opacity: 0; transform: scale(.6); transition: opacity var(--dur-exit) var(--ease-out), transform var(--dur-state) var(--ease-out);
+}
+.btn-sm::after { width: 12px; height: 12px }
+.btn.is-loading::after { opacity: 1; transform: none; transition-duration: var(--dur-enter), var(--dur-state); transition-delay: 60ms }
+.btn:is(.is-loading, .is-settling)::after { animation: btn-spin .7s linear infinite }
+.btn-primary { --spin: var(--invert-fg) }
+.btn-accent  { --spin: var(--accent-fg) }
+.btn-secondary, .btn-ghost { --spin: var(--text) }
+.btn-danger  { --spin: var(--danger-text) }
+@keyframes btn-spin { to { rotate: 1turn } }
+
+/* Кнопка с подтверждением (data-done="Сохранено"): исходная надпись и «галочка + итог» лежат стопкой в одной ячейке —
+   ширина кнопки = большей из двух и не прыгает. Смена — встречный сдвиг на 6px + прозрачность, галочка прорисовывается */
+.btn-stack { display: inline-grid }
+.btn-stack > span { grid-area: 1 / 1; display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-2);
+  transition: opacity var(--dur-enter) var(--ease-out), transform var(--dur-state) var(--ease-out) }
+.btn-stack .lb-b { opacity: 0; transform: translateY(6px); transition-duration: var(--dur-state), var(--dur-slide) }
+.btn-stack .lb-a { transition-duration: var(--dur-state), var(--dur-slide); transition-delay: 120ms, 0s }
+/* Возврат к надписи — сам, его не ждут: спокойнее прихода итога (280/360 против 140–180), надпись проявляется,
+   когда итог уже почти погас — двух сразу не видно. Приход итога — ответ на нажатие, он быстрый */
+.btn.done .lb-a { opacity: 0; transform: translateY(-6px); transition-duration: var(--dur-exit), var(--dur-enter); transition-delay: 0s }
+.btn.done .lb-b { opacity: 1; transform: none; transition-duration: var(--dur-enter), var(--dur-state); transition-delay: 60ms, 0s }
+.btn-stack .lb-b path { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 0s linear var(--dur-exit) }
+.btn.done .lb-b path { stroke-dashoffset: 0; transition: stroke-dashoffset var(--dur-state) var(--ease-out) 80ms }
+.btn:is(.btn-secondary, .btn-ghost) .lb-b svg { color: var(--success-text) }   /* цвет не привязан к .done: иначе при возврате галочка белеет в первом кадре, пока ещё видна */
+
+
+/* Группа кнопок: зазор 8, или слитно (сегменты) */
+.btn-row { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: center }
+
+/* ============ Кнопка-иконка ============ */
+.icon-btn {
+  display: inline-grid; place-items: center; width: var(--h-sm); height: var(--h-sm); padding: 0; border: 0; border-radius: var(--r-sm);
+  background: transparent; color: var(--text-muted); cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--hd) var(--ease-hover), color var(--hd) var(--ease-hover),
+              outline-color var(--dur-focus) var(--ease-out), transform var(--pd) var(--ease-out);
+}
+/* иконка без подложки: при наведении и в открытом состоянии ярче становится сама иконка, фон не появляется */
+.icon-btn[aria-expanded=true] { --hd: var(--dur-icon-in); color: var(--text) }
+@media (hover: hover) and (pointer: fine) { .icon-btn:hover { --hd: var(--dur-icon-in); color: var(--text) } }
+
+/* «Скопировать» (data-copy): по клику иконка копирования гаснет и сжимается, на её месте прорисовывается галочка
+   (stroke-dashoffset), цвет — успех. Через 1,6 с галочка гаснет, иконка копирования возвращается. Всё — переходы, не keyframes:
+   повторный клик посреди анимации подхватывает её с текущего места */
+.copy-btn > svg { grid-area: 1 / 1 }
+.copy-btn .i-copy { transition: opacity var(--dur-enter) var(--ease-out), transform var(--dur-state) var(--ease-out) }
+.copy-btn .i-ok { opacity: 0; transition: opacity var(--dur-exit) var(--ease-out) }
+.copy-btn .i-ok path { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 0s linear var(--dur-exit) }
+.copy-btn.done { --hd: var(--dur-enter); color: var(--success-text) }
+.copy-btn.done .i-copy { opacity: 0; transform: scale(.6) rotate(-8deg) }
+.copy-btn.done .i-ok { opacity: 1; transition-duration: 0s }
+.copy-btn.done .i-ok path { stroke-dashoffset: 0; transition: stroke-dashoffset var(--dur-state) var(--ease-out) 60ms }
+/* Размеры: кнопка и иконка растут вместе, иконка всегда по центру. Высоты совпадают с соседями в строке:
+   xs 24 — внутри тегов, строк таблиц, полей; sm 28 — в строках списков, файлах; по умолчанию 32 — рядом с btn-sm;
+   md 36 — рядом с полями ввода; lg 40 — рядом с основными кнопками */
+.icon-btn > svg { width: var(--ib-ic, var(--icon-md)); height: var(--ib-ic, var(--icon-md)) }
+.icon-btn-xs { width: 24px; height: 24px; border-radius: var(--r-xs); --ib-ic: var(--icon-sm) }
+.icon-btn-sm { width: 28px; height: 28px; border-radius: var(--r-xs) }
+.icon-btn-md { width: var(--h-md); height: var(--h-md) }
+.icon-btn-lg { width: var(--h-lg); height: var(--h-lg); border-radius: var(--r-md); --ib-ic: var(--icon-lg) }
+.icon-btn:disabled { opacity: .45; pointer-events: none }
+
+/* ============ Поле ============ */
+.field { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--sp-2); min-width: 0 }   /* колонка не растёт от содержимого (строка тегов, длинное значение) */
+.label { font-size: var(--fs-sm); line-height: var(--lh-sm); letter-spacing: var(--ls-sm); font-weight: var(--w-medium); color: var(--text-secondary) }
+.label .opt { font-weight: var(--w-regular); color: var(--text-muted) }
+.hint { font-size: var(--fs-sm); line-height: var(--lh-sm); letter-spacing: var(--ls-sm); color: var(--text-muted) }
+.field .error { display: flex; align-items: center; gap: var(--sp-1); font-size: var(--fs-sm); line-height: var(--lh-sm); color: var(--danger-text);
+                animation: msg-in var(--dur-enter) var(--ease-out) }
+.field .error .lucide { width: var(--icon-sm); height: var(--icon-sm) }
+@keyframes msg-in { from { opacity: 0; transform: translateY(calc(var(--shift-sm) * -1)) } }
+.field .hint.is-back { animation: msg-in var(--dur-enter) var(--ease-out) }   /* ошибку исправили — подсказка возвращается так же мягко */
+
+.input, .textarea, .select {
+  width: 100%; height: var(--h-md); padding: 0 var(--sp-3); border: 0; border-radius: var(--r-sm);
+  background: var(--bg-raised); box-shadow: inset 0 0 0 1px var(--border); color: var(--text);
+  font: inherit; font-size: var(--fs-base); line-height: var(--lh-base); letter-spacing: var(--ls-base); font-weight: var(--w-regular);
+  transition: box-shadow var(--hd) var(--ease-hover), background-color var(--hd) var(--ease-hover);
+}
+input.input { text-overflow: ellipsis }   /* длинное значение в узком поле — многоточием, а не обрезом посреди буквы (при фокусе браузер показывает всё) */
+.input::placeholder, .textarea::placeholder { color: var(--text-faint); transition: color var(--hd) var(--ease-hover) }
+@media (hover: hover) and (pointer: fine) { :is(.input, .textarea, .select):hover { box-shadow: inset 0 0 0 1px var(--border-strong) } }
+/* фокус — тонкий контур 1px акцентом, без свечения */
+:is(.input, .textarea, .select):focus, .input.is-focus { outline: none; box-shadow: inset 0 0 0 var(--focus-width) var(--focus-field); --hd: var(--dur-focus) }
+:is(.input, .textarea):focus::placeholder { color: var(--text-muted) }
+/* ошибка: красный контур и в покое, и в фокусе */
+:is(.input, .textarea, .select)[aria-invalid=true] { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--danger) 70%, transparent) }
+:is(.input, .textarea, .select)[aria-invalid=true]:focus { box-shadow: inset 0 0 0 1px var(--danger) }
+:is(.input, .textarea, .select):disabled { opacity: .5; cursor: not-allowed; box-shadow: inset 0 0 0 1px var(--border-subtle) }
+.input[readonly] { background: transparent; box-shadow: inset 0 0 0 1px var(--border-subtle) }
+.input-sm { height: var(--h-sm); font-size: var(--fs-sm); line-height: var(--lh-sm) }
+
+.textarea { height: auto; min-height: 88px; padding: var(--sp-2) var(--sp-3); resize: vertical; field-sizing: content; max-height: 240px }
+/* поле растёт само — ручка размера лишняя, а её первая отрисовка даёт кадр ~45 мс при прокрутке (CPU ×4); где автороста нет, ручка остаётся */
+@supports (field-sizing: content) { .textarea { resize: none } }
+
+/* select: родной, со своей стрелкой */
+.select { appearance: none; padding-right: 36px; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%238a8f98' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center }
+
+/* ============ Выбор из списка (select) ============
+   Разметка всегда — родной <select class="select">. На телефоне он и остаётся родным (системный список удобнее).
+   На десктопе (hover + точный указатель) js/select.js ставит рядом кнопку-триггер и список, родной select прячется,
+   но остаётся источником значения: форма, change-события, disabled — работают как обычно. */
+.select-ui { position: relative; display: block }
+.select-ui > select { position: absolute; inset: 0; opacity: 0; pointer-events: none }      /* для форм и автозаполнения */
+.select-trigger { display: flex; align-items: center; gap: var(--sp-2); text-align: left; cursor: pointer; padding-right: var(--sp-3);
+  outline: var(--focus-outline) solid transparent; outline-offset: 0 }
+.select-trigger > .value { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.select-trigger > .value.placeholder { color: var(--text-faint) }
+.select-trigger > .lucide { color: var(--text-muted); transition: transform var(--dur-enter) var(--ease-out) }
+.select-trigger[aria-expanded=true] { box-shadow: inset 0 0 0 var(--focus-width) var(--focus-field) }
+.select-trigger[aria-expanded=true] > .lucide { transform: rotate(180deg) }
+.select-trigger:focus-visible { outline: none; box-shadow: inset 0 0 0 var(--focus-width) var(--focus-field) }
+.select-trigger:disabled { opacity: .5; cursor: not-allowed }
+/* список: тот же вид и движение, что у меню; ширина = ширине поля, растёт от поля */
+.listbox { left: 0; right: 0; top: calc(100% + var(--sp-1)); min-width: 0; max-height: 280px; overflow-y: auto; overscroll-behavior: contain; --origin: top center }
+/* полоса прокрутки: тонкая, без стрелок, отстоит от края (отступ — прозрачной рамкой бегунка) */
+.listbox.up { top: auto; bottom: calc(100% + var(--sp-1)); --origin: bottom center; transform: translateY(var(--shift-sm)) scale(var(--scale-in)) }
+.listbox.up.open { transform: none }
+.option { display: flex; align-items: center; gap: var(--sp-2); padding: 6px var(--sp-2); border-radius: var(--r-xs); cursor: pointer;
+  font-size: var(--fs-sm); line-height: var(--lh-sm); color: var(--text-secondary); --hd: var(--dur-item-out);
+  transition: background-color var(--hd) var(--ease-hover), color var(--hd) var(--ease-hover) }
+.option > span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.option > small { color: var(--text-faint); font-size: var(--fs-xs) }
+/* выбранный — постоянная лёгкая подложка и плотный текст, без галочки (место под неё = пустая дыра справа);
+   текст пункта на одной линии с текстом поля: 4 (список) + 8 (пункт) = 12 (поле) */
+.option[aria-selected=true] { background: var(--fill); color: var(--text); font-weight: var(--w-medium) }
+.option[aria-selected=true] > small { color: var(--text-muted) }
+.option.active { --hd: 0ms; background: var(--tile); color: var(--text) }
+.option[aria-disabled=true] { opacity: .45; pointer-events: none }
+.listbox .menu-label:not(:first-child) { margin-top: var(--sp-1) }
+
+/* иконка слева / элемент справа (kbd, кнопка очистки) */
+.input-wrap { position: relative; display: block }
+.input-wrap > .lucide { position: absolute; left: var(--sp-3); top: 50%; transform: translateY(-50%); color: var(--text-faint); pointer-events: none;
+                        transition: color var(--dur-hover-out) var(--ease-hover) }
+.input-wrap > .lucide ~ .input { padding-left: 36px }            /* 12 + иконка 16 + 8 */
+.input-wrap:focus-within > .lucide { color: var(--text-muted); transition-duration: var(--dur-focus) }
+.input-wrap > .trail { position: absolute; right: var(--sp-2); top: 50%; transform: translateY(-50%); display: flex; align-items: center }
+.input-wrap:has(.trail) .input { padding-right: 44px }
+
+/* ============ Чекбокс · радио · переключатель ============ */
+.choice { display: inline-flex; align-items: flex-start; gap: var(--sp-2); font-size: var(--fs-base); line-height: var(--lh-base); color: var(--text-secondary); cursor: pointer }
+.choice > :is(.check, .radio) { margin-top: 2px }                /* 16px контрол по центру строки 20 */
+.choice > .switch { margin-top: 0 }
+.choice small { display: block; font-size: var(--fs-sm); line-height: var(--lh-sm); color: var(--text-muted) }
+.choice:has(:disabled) { opacity: .5; cursor: not-allowed }
+
+.check, .radio {
+  appearance: none; flex: none; width: 16px; height: 16px; margin: 0; display: grid; place-items: center; cursor: pointer;
+  background: transparent; box-shadow: inset 0 0 0 1px var(--border-strong);
+  transition: background-color var(--dur-enter) var(--ease-out), box-shadow var(--hd) var(--ease-hover),
+              outline-color var(--dur-focus) var(--ease-out), transform var(--pd) var(--ease-out);
+}
+.check { border-radius: 5px }
+.radio { border-radius: 50% }
+@media (hover:hover) and (pointer:fine) { :is(.check, .radio):not(:checked):not(:disabled):hover { box-shadow: inset 0 0 0 1px var(--text-muted) } }
+:is(.check, .radio):checked { background: var(--accent); box-shadow: inset 0 0 0 1px var(--accent-edge, var(--accent)) }
+/* галочка проявляется из scale(.6), не из нуля */
+.check::after { content: ""; width: 8px; height: 5px; border-left: 1.5px solid var(--accent-fg); border-bottom: 1.5px solid var(--accent-fg);
+  opacity: 0; transform: translateY(-1px) rotate(-45deg) scale(.6); transition: opacity var(--dur-enter) var(--ease-out), transform var(--dur-enter) var(--ease-out) }
+.check:checked::after { opacity: 1; transform: translateY(-1px) rotate(-45deg) scale(1) }
+.check:indeterminate { background: var(--accent); box-shadow: inset 0 0 0 1px var(--accent-edge, var(--accent)) }
+.check:indeterminate::after { width: 8px; height: 0; border-left: 0; transform: none; opacity: 1 }
+.radio::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-fg); opacity: 0; transform: scale(.5);
+  transition: opacity var(--dur-enter) var(--ease-out), transform var(--dur-enter) var(--ease-out) }
+.radio:checked::after { opacity: 1; transform: scale(1) }
+:is(.check, .radio):disabled { cursor: not-allowed }
+
+/* переключатель 36×20, бегунок 16 — едет по transform */
+.switch {
+  appearance: none; flex: none; position: relative; width: 36px; height: 20px; margin: 0; border-radius: var(--r-full); cursor: pointer;
+  background: var(--surface-strong); box-shadow: inset 0 0 0 1px var(--border);
+  transition: background-color var(--dur-state) var(--ease-out), box-shadow var(--hd) var(--ease-hover), outline-color var(--dur-focus) var(--ease-out);
+}
+.switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff;
+  box-shadow: 0 1px 2px #0000004d, 0 0 0 .5px #0000001f; transition: transform var(--dur-state) var(--ease-out), width var(--pd) var(--ease-out), background-color var(--dur-state) var(--ease-out) }
+.switch:checked { background: var(--accent); box-shadow: inset 0 0 0 1px var(--accent-edge, var(--accent)) }
+.switch:checked::after { transform: translateX(16px); background: var(--accent-fg) }   /* бегунок — цвет текста на акценте: в «Моно» на тёмной акцент белый, белый бегунок пропадал */
+.switch:disabled { cursor: not-allowed }
+
+/* ============ Сегменты и вкладки ============ */
+/* Сегменты: подложка выбранного едет между пунктами (одна плашка, transform) */
+/* Сегменты (.seg) и группа переключателей (.tgl): выбранный пункт должен читаться сразу.
+   Тёмная — светлая плашка 13% + чёткая рамка; светлая — белая «таблетка» с тенью на сером треке */
+.seg, .tgl { --seg-track: var(--fill); --seg-on: color-mix(in srgb, var(--text) 13%, transparent); --seg-ring: var(--border-strong); --seg-shadow: 0 1px 2px #00000066 }
+[data-theme="light"] :is(.seg, .tgl) { --seg-track: color-mix(in srgb, var(--text) 6%, transparent); --seg-on: var(--surface); --seg-ring: #0000001f; --seg-shadow: 0 1px 2px #0000001f }
+.seg { position: relative; display: inline-flex; justify-self: start; align-self: start; padding: 2px; gap: 2px; border-radius: var(--r-md); background: var(--seg-track); box-shadow: inset 0 0 0 1px var(--border-subtle) }
+.seg button { position: relative; z-index: 1; height: 28px; padding: 0 var(--sp-3); border: 0; border-radius: var(--r-sm); background: none;
+  font: inherit; font-size: var(--fs-sm); line-height: var(--lh-sm); font-weight: var(--w-medium); color: var(--text-muted); cursor: pointer;
+  transition: color var(--hd) var(--ease-hover), outline-color var(--dur-focus) var(--ease-out) }
+@media (hover: hover) and (pointer: fine) { .seg button:hover { color: var(--text-secondary) } }
+.seg button[aria-pressed=true] { color: var(--text) }
+.seg .thumb { position: absolute; z-index: 0; top: 2px; left: 0; height: 28px; width: var(--w, 0); border-radius: var(--r-sm);
+  background: var(--seg-on); box-shadow: inset 0 0 0 1px var(--seg-ring), var(--seg-shadow);
+  transform: translateX(var(--x, 0)); transition: transform var(--dur-morph) var(--ease-out), width var(--dur-morph) var(--ease-out) }
+.seg.no-anim .thumb { transition: none }
+/* на сенсорном экране цель касания 44px: невидимый край по 8px сверху и снизу (сам сегмент остаётся 32px) */
+@media (pointer: coarse) { .seg button::after { content: ""; position: absolute; inset: -8px 0 } }
+
+/* Вкладки: линия под активной едет между вкладками */
+.tabs { position: relative; display: flex; gap: var(--sp-1); box-shadow: inset 0 -1px 0 var(--border-subtle) }
+.tab { position: relative; height: 40px; padding: 0 var(--sp-3); white-space: nowrap; border: 0; background: none; border-radius: var(--r-sm) var(--r-sm) 0 0;
+  font: inherit; font-size: var(--fs-base); line-height: var(--lh-base); font-weight: var(--w-medium); color: var(--text-muted); cursor: pointer;
+  transition: color var(--hd) var(--ease-hover), outline-color var(--dur-focus) var(--ease-out); outline-offset: -2px }
+@media (hover: hover) and (pointer: fine) { .tab:hover { color: var(--text-secondary) } }
+.tab[aria-selected=true] { color: var(--text) }
+.tabs .line { position: absolute; bottom: 0; left: 0; height: 2px; width: var(--w, 0); border-radius: 2px; background: var(--text);
+  transform: translateX(var(--x, 0)); transition: transform var(--dur-morph) var(--ease-out), width var(--dur-morph) var(--ease-out) }
+.tabs.no-anim .line { transition: none }
+.tab-panel { padding-top: var(--sp-4); animation: msg-in var(--dur-enter) var(--ease-out) }
+
+/* ============ Бейдж ============ */
+.badge { display: inline-flex; align-items: center; gap: 6px; height: 20px; padding: 0 var(--sp-2); border-radius: var(--r-full);
+  font-size: var(--fs-xs); line-height: var(--lh-xs); font-weight: var(--w-medium); white-space: nowrap;
+  background: var(--fill); color: var(--text-secondary); box-shadow: inset 0 0 0 1px var(--border-subtle) }
+.badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor }
+.badge-accent  { background: var(--accent-tint);  color: var(--accent-text);  box-shadow: none }
+.badge-success { background: var(--success-tint); color: var(--success-text); box-shadow: none }
+.badge-warning { background: var(--warning-tint); color: var(--warning-text); box-shadow: none }
+.badge-danger  { background: var(--danger-tint);  color: var(--danger-text);  box-shadow: none }
+.badge-info    { background: var(--info-tint);    color: var(--info-text);    box-shadow: none }
+.badge-mono    { font-family: var(--font-mono); font-size: var(--fs-2xs); letter-spacing: .04em; text-transform: uppercase; border-radius: var(--r-xs) }
+
+.kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 var(--sp-1); border-radius: var(--r-xs);
+  font: var(--w-medium) var(--fs-2xs)/var(--lh-2xs) var(--font-mono); color: var(--text-muted); background: var(--fill); box-shadow: inset 0 0 0 1px var(--border), inset 0 -1px 0 var(--border) }
+
+/* ============ Карточка ============ */
+.card { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-6); border-radius: var(--r-xl);
+  background: var(--surface); box-shadow: inset 0 0 0 1px var(--border), var(--shadow-sm) }
+.card-title { margin: 0; display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-md); line-height: var(--lh-md); letter-spacing: var(--ls-md); font-weight: var(--w-semibold) }
+.card-title .lucide { color: var(--text-muted) }
+.card-text { margin: 0; color: var(--text-muted); max-width: var(--measure-narrow) }
+.card-foot { margin-top: auto; padding-top: var(--sp-4); display: flex; align-items: center; gap: var(--sp-2) }
+/* карточка-ссылка: целиком кликабельна, отзывается фоном и рамкой, стрелка сдвигается */
+.card-link { text-decoration: none; color: inherit; cursor: pointer;
+  transition: background-color var(--hd) var(--ease-hover), box-shadow var(--hd) var(--ease-hover), outline-color var(--dur-focus) var(--ease-out) }
+@media (hover: hover) and (pointer: fine) { .card-link:hover { background: var(--surface-hover); box-shadow: inset 0 0 0 1px var(--border-strong), var(--shadow-sm) } }
+.card-link .arrow { margin-left: auto; color: var(--text-faint); transition: transform var(--hd) var(--ease-out), color var(--hd) var(--ease-hover) }
+@media (hover:hover) and (pointer:fine) { .card-link:hover .arrow { transform: translateX(2px); color: var(--text) } }
+
+/* ============ Сообщение (alert) ============ */
+/* Мягкий оттенок цвета типа, без рамки и без полосы по краю. Заголовок — основной текст, пояснение — тише.
+   Иконка 20px — сам знак без круга (галочка, крестик, треугольник), «i» — в круге; линия 2.25, центр на строке заголовка */
+.alert { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: var(--sp-3); align-items: start; padding: 14px var(--sp-4);
+  border-radius: var(--r-md); background: var(--fill); font-size: var(--fs-sm); line-height: var(--lh-sm); color: var(--text-muted) }
+.alert > .lucide { width: 20px; height: 20px; stroke-width: 2.25; color: var(--text-muted) }
+.alert > .lucide-info { stroke-width: 2 }
+.alert b { display: block; margin-bottom: 2px; font-weight: var(--w-medium); color: var(--text) }
+.alert-info    { background: color-mix(in srgb, var(--info) 9%, transparent) }
+.alert-info > .lucide { color: var(--info-text) }
+.alert-success { background: color-mix(in srgb, var(--success) 9%, transparent) }
+.alert-success > .lucide { color: var(--success-text) }
+.alert-warning { background: color-mix(in srgb, var(--warning) 10%, transparent) }
+.alert-warning > .lucide { color: var(--warning-text) }
+.alert-danger  { background: color-mix(in srgb, var(--danger) 9%, transparent) }
+.alert-danger > .lucide { color: var(--danger-text) }
+/* крестик — своей колонкой, только если он есть: пустая третья колонка с отступом давала справа 28px вместо 16 */
+.alert > .icon-btn { grid-column: 3; grid-row: 1; margin: -6px -8px -6px 0 }
+
+/* ============ Подсказка (tooltip) ============ */
+/* Первая — с задержкой 400 мс; пока одна открыта, соседние открываются сразу и без анимации */
+.tip { position: fixed; z-index: 60; max-width: 240px; padding: var(--sp-1) var(--sp-2); border-radius: var(--r-sm);
+  background: var(--surface-strong); color: var(--text); box-shadow: inset 0 0 0 1px var(--border), var(--shadow-md);
+  font-size: var(--fs-xs); line-height: var(--lh-xs); pointer-events: none; transform-origin: var(--origin, bottom center);
+  opacity: 0; transform: scale(var(--scale-in)); transition: opacity var(--dur-exit) var(--ease-out), transform var(--dur-exit) var(--ease-out) }
+.tip.show { opacity: 1; transform: none; transition-duration: 125ms }
+.tip.instant { transition: none }
+.tip .kbd { margin-left: var(--sp-2); height: 16px; min-width: 16px; background: none }
+
+/* ============ Выпадающее меню ============ */
+.menu { position: absolute; z-index: 50; min-width: 200px; padding: var(--sp-1); border-radius: var(--r-md);
+  background: var(--bg-raised); box-shadow: inset 0 0 0 1px var(--border), var(--shadow-md); transform-origin: var(--origin, top left);
+  opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(calc(var(--shift-sm) * -1)) scale(var(--scale-in));
+  transition: opacity var(--dur-exit) var(--ease-out), transform var(--dur-exit) var(--ease-out), visibility 0s linear var(--dur-exit) }
+.menu.open { opacity: 1; visibility: visible; pointer-events: auto; transform: none;
+  transition: opacity var(--dur-enter) var(--ease-out), transform var(--dur-enter) var(--ease-out), visibility 0s }
+/* пункт 32 = строка 20 + 2×6; приход мгновенный (меню навигируют быстро), уход короткий */
+.menu-item { display: flex; align-items: center; gap: var(--sp-2); width: 100%; padding: 6px var(--sp-2); border: 0; border-radius: var(--r-xs);
+  background: none; color: var(--text-secondary); font: inherit; font-size: var(--fs-sm); line-height: var(--lh-sm); text-align: left; text-decoration: none; cursor: pointer;
+  --hd: var(--dur-item-out); transition: background-color var(--hd) var(--ease-hover), color var(--hd) var(--ease-hover) }
+.menu-item > span { flex: 1 }
+.menu-item .lucide { color: var(--text-muted); transition: color var(--hd) var(--ease-hover) }
+.menu-item:focus-visible { --hd: 0ms; background: var(--tile); color: var(--text); outline: none }
+@media (hover: hover) and (pointer: fine) { .menu-item:hover { --hd: 0ms; background: var(--tile); color: var(--text); outline: none } }
+.menu-item:focus-visible .lucide { color: var(--text) }
+@media (hover: hover) and (pointer: fine) { .menu-item:hover .lucide { color: var(--text) } }
+.menu-item.danger, .menu-item.danger .lucide { color: var(--danger-text) }
+.menu-item.danger:focus-visible { background: var(--danger-tint); color: var(--danger-text) }
+@media (hover: hover) and (pointer: fine) { .menu-item.danger:hover { background: var(--danger-tint); color: var(--danger-text) } }
+.menu-item.danger:focus-visible .lucide { color: var(--danger-text) }
+@media (hover: hover) and (pointer: fine) { .menu-item.danger:hover .lucide { color: var(--danger-text) } }
+.menu-item[aria-disabled=true] { opacity: .45; pointer-events: none }
+.menu-item .kbd { flex: none; justify-content: flex-end; height: 18px; min-width: 18px; background: none; box-shadow: none; color: var(--text-faint) }   /* не растягивается: подсказки прижаты к одному краю */
+.menu-label { padding: var(--sp-2) var(--sp-2) var(--sp-1); font: var(--w-medium) var(--fs-2xs)/var(--lh-2xs) var(--font-mono); letter-spacing: var(--label-tracking); text-transform: uppercase; color: var(--text-faint) }
+.menu-sep { height: 1px; margin: var(--sp-1) var(--sp-2); background: var(--border) }   /* не до краёв */
+
+/* ============ Блокировка прокрутки ============
+   Пока открыто что-то модальное — страница под ним не прокручивается: js/scroll-lock.js (подключается один раз, ловит
+   любой <dialog> через showModal и <html data-modal-open>). overflow:hidden НЕ используем: он убирает полосу прокрутки
+   за один кадр — это «мигание» правого края. Здесь полоса остаётся, страница просто не реагирует. */
+dialog:modal, [data-modal-layer] { overscroll-behavior: contain }
+
+/* ============ Диалог ============ */
+.dialog { width: min(440px, calc(100vw - 32px)); padding: 0; border: 0; border-radius: var(--r-xl); color: var(--text);
+  background: var(--bg-raised); box-shadow: inset 0 0 0 1px var(--border), var(--shadow-lg);
+  opacity: 0; transform: translateY(var(--shift-md)) scale(var(--scale-in));
+  transition: opacity var(--dur-exit) var(--ease-out), transform var(--dur-exit) var(--ease-out), overlay var(--dur-exit) allow-discrete, display var(--dur-exit) allow-discrete }
+.dialog[open] { opacity: 1; transform: none; transition-duration: 200ms }
+/* свой слой у открытого окна: смена его высоты перерисовывает только окно, а не всю страницу под ним
+   (замер: без слоя каждый кадр удаления строки перерисовывал 6,3 млн пикселей — всю страницу) */
+.dialog { will-change: transform }
+@starting-style { .dialog[open] { opacity: 0; transform: translateY(var(--shift-md)) scale(var(--scale-in)) } }
+.dialog::backdrop { background: #00000000; transition: background-color var(--dur-exit) var(--ease-out), overlay var(--dur-exit) allow-discrete, display var(--dur-exit) allow-discrete }
+.dialog[open]::backdrop { background: #0000008c; transition-duration: 200ms }
+@starting-style { .dialog[open]::backdrop { background: #00000000 } }
+[data-theme="light"] .dialog[open]::backdrop { background: #0f101166 }
+.dialog-body { padding: var(--sp-6) var(--sp-6) 0 }
+.dialog h2 { margin: 0 0 var(--sp-2); font-size: var(--fs-lg); line-height: var(--lh-lg); letter-spacing: var(--ls-lg); font-weight: var(--w-semibold) }
+.dialog p { margin: 0; color: var(--text-muted) }
+.dialog-foot { display: flex; justify-content: flex-end; gap: var(--sp-2); padding: var(--sp-6) }
+
+/* Уведомление — стопка .tst в layers.css, вызывается toast() из js/layers.js */
+
+/* ============ Таблица ============ */
+.table-wrap { border-radius: var(--r-lg); background: var(--surface); box-shadow: inset 0 0 0 1px var(--border-subtle); overflow: auto; padding: var(--sp-1) var(--sp-2) }
+.table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: var(--fs-sm); line-height: var(--lh-sm); font-variant-numeric: tabular-nums }
+.table th { height: 36px; padding: 0 var(--sp-3); text-align: left; font-weight: var(--w-medium); color: var(--text-muted); white-space: nowrap }
+.table td { height: 40px; padding: 0 var(--sp-3); color: var(--text-secondary); white-space: nowrap }
+.table .num { text-align: right }
+/* .table-static — таблица, которую нельзя нажать (сравнение, справка): без плитки наведения. Заголовок строки — th scope="row".
+   разделитель строк — внутри строки, со скруглёнными концами; плитка наведения — скруглённая, не до краёв */
+.table tbody tr { position: relative }
+.table tbody :is(td, th) { position: relative; transition: background-color var(--hd) var(--ease-hover) }
+.table tbody tr:not(:first-child) :is(td, th)::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: var(--border-subtle); transition: opacity var(--hd) var(--ease-hover) }
+.table tbody tr:not(:first-child) :is(td, th):first-child::before { left: var(--sp-3) }
+.table tbody tr:not(:first-child) :is(td, th):last-child::before { right: var(--sp-3) }
+.table tbody tr { --hd: var(--dur-hover-out) }
+@media (hover: hover) and (pointer: fine) { .table:not(.table-static) tbody tr:hover { --hd: var(--dur-hover-in) } }
+@media (hover: hover) and (pointer: fine) { .table:not(.table-static) tbody tr:hover :is(td, th) { background: var(--tile) } }
+.table tbody :is(td, th):first-child { border-radius: var(--r-sm) 0 0 var(--r-sm) }   /* скругление постоянное: фон гаснет */
+.table tbody :is(td, th):last-child { border-radius: 0 var(--r-sm) var(--r-sm) 0 }     /* плавно, форма при этом не меняется */
+@media (hover: hover) and (pointer: fine) { .table:not(.table-static) tbody tr:hover :is(td, th)::before, .table:not(.table-static) tbody tr:hover + tr :is(td, th)::before { opacity: 0 } }
+@media (hover: hover) and (pointer: fine) { .table:not(.table-static) tbody tr:hover + tr { --hd: var(--dur-hover-in) } }
+/* .table-stack — сравнение (тарифы, варианты) на телефоне: без рамки, имена колонок липкой строкой сверху,
+   у каждой строки название над значениями, значения по колонкам. Число колонок значений — --cols (по умолчанию 3).
+   Выбран пользователем из трёх вариантов (как у Linear — один тариф за раз, как у Supabase — список; выбран «всё сразу»). */
+@media (max-width: 640px) {
+  .table-wrap:has(> .table-stack) { padding: 0; border-radius: 0; background: none; box-shadow: none; overflow: visible }
+  .table-stack, .table-stack thead, .table-stack tbody { display: block }
+  .table-stack thead { position: sticky; top: var(--stack-top, 64px); z-index: 1; background: var(--bg) }
+  .table-stack tr { display: grid; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); column-gap: var(--sp-2) }
+  .table-stack thead tr, .table-stack tbody tr { box-shadow: inset 0 -1px 0 var(--border-subtle) }
+  .table-stack thead :is(th, td):first-child { display: none }
+  .table-stack :is(th, td) { height: auto; padding: 0; border-radius: 0; white-space: normal }
+  .table-stack thead th { padding: var(--sp-3) 0; font-size: var(--fs-md); line-height: var(--lh-md); color: var(--text); font-weight: var(--w-medium) }
+  .table-stack tbody th { grid-column: 1 / -1; padding-top: var(--sp-3); color: var(--text-muted); font-weight: var(--w-regular) }
+  .table-stack tbody td { display: flex; align-items: center; min-height: 36px; color: var(--text); font-weight: var(--w-medium) }
+  .table-stack tbody :is(td, th)::before { display: none }
+}
+.table .muted { color: var(--text-muted) }   /* данные (время, суммы) — не ниже 4.5:1; faint только для подписей и плейсхолдеров */
+.table .strong { color: var(--text); font-weight: var(--w-medium) }
+
+/* ============ Аватар ============ */
+.avatar { display: inline-grid; place-items: center; flex: none; width: 24px; height: 24px; border-radius: 50%;
+  font-size: var(--fs-2xs); line-height: 1; font-weight: var(--w-semibold); color: var(--text); background: var(--surface-strong); box-shadow: inset 0 0 0 1px var(--border) }
+.avatar-md { width: 32px; height: 32px; font-size: var(--fs-xs) }
+.avatars { display: flex }
+.avatars .avatar + .avatar { margin-left: -6px; box-shadow: 0 0 0 2px var(--surface), inset 0 0 0 1px var(--border) }
+
+/* ============ Загрузка ============ */
+/* Скелет: мягкая пульсация прозрачности, без бегущего блика */
+.skeleton { border-radius: var(--r-xs); background: var(--tile-strong); animation: pulse 1.6s var(--ease-in-out) infinite }
+@keyframes pulse { 50% { opacity: .5 } }
+@keyframes spin { to { transform: rotate(1turn) } }
+/* ============ Спиннер: восемь видов, один элемент ============
+   Вид по умолчанию — одна строка в js/theme.js (SPINNER = 'tail' | 'ring' | 'rays' | 'dots' | 'bars' | 'grid' | 'square' | 'arc').
+   На отдельной странице: <html data-spinner="dots">, у отдельного места: data-spinner на элементе или его родителе.
+   Тот же вид рисуется в кнопке при загрузке (.btn::after) — поэтому всё на фоне и маске, без вложенных элементов */
+.spinner { display: inline-block; flex: none; box-sizing: border-box; width: 16px; height: 16px; border-radius: 50%; color: var(--text-muted); --sc: currentColor; animation: spin .7s linear infinite }
+/* запасной вид, если страница без theme.js — кольцо */
+.spinner, .btn::after { border: 2px solid color-mix(in srgb, var(--sc) 22%, transparent); border-top-color: var(--sc) }
+/* Какой вид где: ближайшая настройка побеждает — сам элемент (#_ поднимает вес), затем контейнер, затем страница (<html>).
+   Каждый вид задаёт все свои свойства целиком, поэтому виды не смешиваются */
+@property --d1 { syntax: "<number>"; inherits: false; initial-value: .3 }
+@property --d2 { syntax: "<number>"; inherits: false; initial-value: .3 }
+@property --d3 { syntax: "<number>"; inherits: false; initial-value: .3 }
+/* кольцо: дуга на бледном кольце того же цвета, штрих 2px */
+:where(:root[data-spinner=ring]) :is(.spinner), [data-spinner=ring]:not(:root) .spinner, .spinner[data-spinner=ring]:not(#_),
+:where(:root[data-spinner=ring]) .btn::after, [data-spinner=ring]:not(:root) .btn::after {
+  border: 2px solid color-mix(in srgb, var(--sc) 22%, transparent); border-top-color: var(--sc); border-radius: 50%; padding: 0; background: none; -webkit-mask: none; mask: none }
+:where(:root[data-spinner=ring]) :is(.spinner), [data-spinner=ring]:not(:root) .spinner, .spinner[data-spinner=ring]:not(#_) { animation: spin .7s linear infinite }
+:where(:root[data-spinner=ring]) .btn:is(.is-loading, .is-settling)::after, [data-spinner=ring]:not(:root) .btn:is(.is-loading, .is-settling)::after { animation: btn-spin .7s linear infinite }
+/* хвост: без кольца, дуга гаснет к хвосту, голова впереди по ходу вращения */
+:where(:root[data-spinner=tail]) :is(.spinner), [data-spinner=tail]:not(:root) .spinner, .spinner[data-spinner=tail]:not(#_),
+:where(:root[data-spinner=tail]) .btn::after, [data-spinner=tail]:not(:root) .btn::after {
+  border: 0; border-radius: 50%; padding: 0; background: conic-gradient(#0000 8%, var(--sc));
+  -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 2px), #000 calc(100% - 1.5px)); mask: radial-gradient(farthest-side, #0000 calc(100% - 2px), #000 calc(100% - 1.5px)) }
+:where(:root[data-spinner=tail]) :is(.spinner), [data-spinner=tail]:not(:root) .spinner, .spinner[data-spinner=tail]:not(#_) { animation: spin .8s linear infinite }
+:where(:root[data-spinner=tail]) .btn:is(.is-loading, .is-settling)::after, [data-spinner=tail]:not(:root) .btn:is(.is-loading, .is-settling)::after { animation: btn-spin .8s linear infinite }
+/* лучи: 8 штрихов, яркость бежит по кругу шагами (как в macOS/iOS) */
+:where(:root[data-spinner=rays]) :is(.spinner), [data-spinner=rays]:not(:root) .spinner, .spinner[data-spinner=rays]:not(#_),
+:where(:root[data-spinner=rays]) .btn::after, [data-spinner=rays]:not(:root) .btn::after {
+  border: 0; border-radius: 0; padding: 0; background: conic-gradient(color-mix(in srgb, var(--sc) 18%, transparent), var(--sc));
+  -webkit-mask: repeating-conic-gradient(from -7deg, #000 0 14deg, #0000 14deg 45deg), radial-gradient(farthest-side, #0000 42%, #000 45%, #000 97%, #0000); -webkit-mask-composite: source-in;
+  mask: repeating-conic-gradient(from -7deg, #000 0 14deg, #0000 14deg 45deg), radial-gradient(farthest-side, #0000 42%, #000 45%, #000 97%, #0000); mask-composite: intersect }
+:where(:root[data-spinner=rays]) :is(.spinner), [data-spinner=rays]:not(:root) .spinner, .spinner[data-spinner=rays]:not(#_) { animation: spin .8s steps(8) infinite }
+:where(:root[data-spinner=rays]) .btn:is(.is-loading, .is-settling)::after, [data-spinner=rays]:not(:root) .btn:is(.is-loading, .is-settling)::after { animation: btn-spin .8s steps(8) infinite }
+/* точки: три точки зажигаются по очереди, без вращения */
+:where(:root[data-spinner=dots]) :is(.spinner), [data-spinner=dots]:not(:root) .spinner, .spinner[data-spinner=dots]:not(#_),
+:where(:root[data-spinner=dots]) .btn::after, [data-spinner=dots]:not(:root) .btn::after {
+  border: 0; border-radius: 0; padding: 0; -webkit-mask: none; mask: none;
+  background: radial-gradient(circle closest-side, color-mix(in srgb, var(--sc) calc(var(--d1) * 100%), transparent) 92%, #0000) 0 50% / 25% 25% no-repeat,
+              radial-gradient(circle closest-side, color-mix(in srgb, var(--sc) calc(var(--d2) * 100%), transparent) 92%, #0000) 50% 50% / 25% 25% no-repeat,
+              radial-gradient(circle closest-side, color-mix(in srgb, var(--sc) calc(var(--d3) * 100%), transparent) 92%, #0000) 100% 50% / 25% 25% no-repeat }
+:where(:root[data-spinner=dots]) :is(.spinner), [data-spinner=dots]:not(:root) .spinner, .spinner[data-spinner=dots]:not(#_) { animation: dots .9s var(--ease-in-out) infinite }
+:where(:root[data-spinner=dots]) .btn:is(.is-loading, .is-settling)::after, [data-spinner=dots]:not(:root) .btn:is(.is-loading, .is-settling)::after { animation: dots .9s var(--ease-in-out) infinite }
+@keyframes dots { 0%, 100% { --d1: 1; --d2: .3; --d3: .3 } 33% { --d1: .3; --d2: 1; --d3: .3 } 66% { --d1: .3; --d2: .3; --d3: 1 } }
+/* столбики: три полоски поднимаются волной */
+@property --b1 { syntax: "<number>"; inherits: false; initial-value: .35 }
+@property --b2 { syntax: "<number>"; inherits: false; initial-value: .35 }
+@property --b3 { syntax: "<number>"; inherits: false; initial-value: .35 }
+:where(:root[data-spinner=bars]) :is(.spinner), [data-spinner=bars]:not(:root) .spinner, .spinner[data-spinner=bars]:not(#_),
+:where(:root[data-spinner=bars]) .btn::after, [data-spinner=bars]:not(:root) .btn::after {
+  border: 0; border-radius: 0; padding: 0; -webkit-mask: none; mask: none;
+  background: linear-gradient(color-mix(in srgb, var(--sc) calc(var(--b1) * 100%), transparent) 0 0) 0 50% / 20% calc(var(--b1) * 100%) no-repeat,
+              linear-gradient(color-mix(in srgb, var(--sc) calc(var(--b2) * 100%), transparent) 0 0) 50% 50% / 20% calc(var(--b2) * 100%) no-repeat,
+              linear-gradient(color-mix(in srgb, var(--sc) calc(var(--b3) * 100%), transparent) 0 0) 100% 50% / 20% calc(var(--b3) * 100%) no-repeat }
+:where(:root[data-spinner=bars]) :is(.spinner), [data-spinner=bars]:not(:root) .spinner, .spinner[data-spinner=bars]:not(#_) { animation: bars .9s linear infinite }
+:where(:root[data-spinner=bars]) .btn:is(.is-loading, .is-settling)::after, [data-spinner=bars]:not(:root) .btn:is(.is-loading, .is-settling)::after { animation: bars .9s linear infinite }
+@keyframes bars {
+ 0.0% { --b1: 0.350; --b2: 0.350; --b3: 0.350 }
+ 2.78% { --b1: 0.360; --b2: 0.350; --b3: 0.350 }
+ 5.56% { --b1: 0.390; --b2: 0.350; --b3: 0.350 }
+ 8.33% { --b1: 0.437; --b2: 0.350; --b3: 0.350 }
+ 11.11% { --b1: 0.499; --b2: 0.350; --b3: 0.350 }
+ 13.89% { --b1: 0.571; --b2: 0.350; --b3: 0.350 }
+ 16.67% { --b1: 0.651; --b2: 0.364; --b3: 0.350 }
+ 19.44% { --b1: 0.731; --b2: 0.398; --b3: 0.350 }
+ 22.22% { --b1: 0.809; --b2: 0.448; --b3: 0.350 }
+ 25.0% { --b1: 0.878; --b2: 0.513; --b3: 0.350 }
+ 27.78% { --b1: 0.934; --b2: 0.587; --b3: 0.352 }
+ 30.56% { --b1: 0.974; --b2: 0.667; --b3: 0.370 }
+ 33.33% { --b1: 0.996; --b2: 0.747; --b3: 0.407 }
+ 36.11% { --b1: 0.998; --b2: 0.823; --b3: 0.460 }
+ 38.89% { --b1: 0.980; --b2: 0.890; --b3: 0.527 }
+ 41.67% { --b1: 0.944; --b2: 0.944; --b3: 0.603 }
+ 44.44% { --b1: 0.890; --b2: 0.980; --b3: 0.683 }
+ 47.22% { --b1: 0.823; --b2: 0.998; --b3: 0.763 }
+ 50.0% { --b1: 0.747; --b2: 0.996; --b3: 0.838 }
+ 52.78% { --b1: 0.667; --b2: 0.974; --b3: 0.902 }
+ 55.56% { --b1: 0.587; --b2: 0.934; --b3: 0.952 }
+ 58.33% { --b1: 0.512; --b2: 0.878; --b3: 0.986 }
+ 61.11% { --b1: 0.448; --b2: 0.809; --b3: 1.000 }
+ 63.89% { --b1: 0.398; --b2: 0.731; --b3: 0.994 }
+ 66.67% { --b1: 0.364; --b2: 0.651; --b3: 0.968 }
+ 69.44% { --b1: 0.350; --b2: 0.571; --b3: 0.924 }
+ 72.22% { --b1: 0.350; --b2: 0.499; --b3: 0.865 }
+ 75.0% { --b1: 0.350; --b2: 0.437; --b3: 0.794 }
+ 77.78% { --b1: 0.350; --b2: 0.390; --b3: 0.715 }
+ 80.56% { --b1: 0.350; --b2: 0.360; --b3: 0.634 }
+ 83.33% { --b1: 0.350; --b2: 0.350; --b3: 0.556 }
+ 86.11% { --b1: 0.350; --b2: 0.350; --b3: 0.485 }
+ 88.89% { --b1: 0.350; --b2: 0.350; --b3: 0.426 }
+ 91.67% { --b1: 0.350; --b2: 0.350; --b3: 0.382 }
+ 94.44% { --b1: 0.350; --b2: 0.350; --b3: 0.356 }
+ 97.22% { --b1: 0.350; --b2: 0.350; --b3: 0.350 }
+ 100.0% { --b1: 0.350; --b2: 0.350; --b3: 0.350 }
+}
+/* сетка 3×3: квадратики вспыхивают волной по диагонали */
+@property --g0 { syntax: "<number>"; inherits: false; initial-value: .2 }
+@property --g1 { syntax: "<number>"; inherits: false; initial-value: .2 }
+@property --g2 { syntax: "<number>"; inherits: false; initial-value: .2 }
+@property --g3 { syntax: "<number>"; inherits: false; initial-value: .2 }
+@property --g4 { syntax: "<number>"; inherits: false; initial-value: .2 }
+:where(:root[data-spinner=grid]) :is(.spinner), [data-spinner=grid]:not(:root) .spinner, .spinner[data-spinner=grid]:not(#_),
+:where(:root[data-spinner=grid]) .btn::after, [data-spinner=grid]:not(:root) .btn::after {
+  border: 0; border-radius: 0; padding: 0; -webkit-mask: none; mask: none;
+  background: linear-gradient(color-mix(in srgb, var(--sc) calc(var(--g0) * 100%), transparent) 0 0) 0 0 / 28% 28% no-repeat,
+              linear-gradient(color-mix(in srgb, var(--sc) calc(var(--g1) * 100%), transparent) 0 0) 50% 0 / 28% 28% no-repeat,
+              linear-gradient(color-mix(in srgb, var(--sc) calc(var(--g2) * 100%), transparent) 0 0) 100% 0 / 28% 28% no-repeat,
+              linear-gradient(color-mix(in srgb, var(--sc) calc(var(--g1) * 100%), transparent) 0 0) 0 50% / 28% 28% no-repeat,
+              linear-gradient(color-mix(in srgb, var(--sc) calc(var(--g2) * 100%), transparent) 0 0) 50% 50% / 28% 28% no-repeat,
+              linear-gradient(color-mix(in srgb, var(--sc) calc(var(--g3) * 100%), transparent) 0 0) 100% 50% / 28% 28% no-repeat,
+              linear-gradient(color-mix(in srgb, var(--sc) calc(var(--g2) * 100%), transparent) 0 0) 0 100% / 28% 28% no-repeat,
+              linear-gradient(color-mix(in srgb, var(--sc) calc(var(--g3) * 100%), transparent) 0 0) 50% 100% / 28% 28% no-repeat,
+              linear-gradient(color-mix(in srgb, var(--sc) calc(var(--g4) * 100%), transparent) 0 0) 100% 100% / 28% 28% no-repeat }
+:where(:root[data-spinner=grid]) :is(.spinner), [data-spinner=grid]:not(:root) .spinner, .spinner[data-spinner=grid]:not(#_) { animation: grid 1.2s linear infinite }
+:where(:root[data-spinner=grid]) .btn:is(.is-loading, .is-settling)::after, [data-spinner=grid]:not(:root) .btn:is(.is-loading, .is-settling)::after { animation: grid 1.2s linear infinite }
+@keyframes grid {
+ 0.0% { --g0: 0.200; --g1: 0.200; --g2: 0.200; --g3: 0.200; --g4: 0.200 }
+ 2.5% { --g0: 0.214; --g1: 0.200; --g2: 0.200; --g3: 0.200; --g4: 0.200 }
+ 5.0% { --g0: 0.254; --g1: 0.200; --g2: 0.200; --g3: 0.200; --g4: 0.200 }
+ 7.5% { --g0: 0.317; --g1: 0.200; --g2: 0.200; --g3: 0.200; --g4: 0.200 }
+ 10.0% { --g0: 0.400; --g1: 0.200; --g2: 0.200; --g3: 0.200; --g4: 0.200 }
+ 12.5% { --g0: 0.496; --g1: 0.214; --g2: 0.200; --g3: 0.200; --g4: 0.200 }
+ 15.0% { --g0: 0.600; --g1: 0.254; --g2: 0.200; --g3: 0.200; --g4: 0.200 }
+ 17.5% { --g0: 0.704; --g1: 0.317; --g2: 0.200; --g3: 0.200; --g4: 0.200 }
+ 20.0% { --g0: 0.800; --g1: 0.400; --g2: 0.200; --g3: 0.200; --g4: 0.200 }
+ 22.5% { --g0: 0.883; --g1: 0.496; --g2: 0.214; --g3: 0.200; --g4: 0.200 }
+ 25.0% { --g0: 0.946; --g1: 0.600; --g2: 0.254; --g3: 0.200; --g4: 0.200 }
+ 27.5% { --g0: 0.986; --g1: 0.704; --g2: 0.317; --g3: 0.200; --g4: 0.200 }
+ 30.0% { --g0: 1.000; --g1: 0.800; --g2: 0.400; --g3: 0.200; --g4: 0.200 }
+ 32.5% { --g0: 0.986; --g1: 0.883; --g2: 0.496; --g3: 0.214; --g4: 0.200 }
+ 35.0% { --g0: 0.946; --g1: 0.946; --g2: 0.600; --g3: 0.254; --g4: 0.200 }
+ 37.5% { --g0: 0.883; --g1: 0.986; --g2: 0.704; --g3: 0.317; --g4: 0.200 }
+ 40.0% { --g0: 0.800; --g1: 1.000; --g2: 0.800; --g3: 0.400; --g4: 0.200 }
+ 42.5% { --g0: 0.704; --g1: 0.986; --g2: 0.883; --g3: 0.496; --g4: 0.214 }
+ 45.0% { --g0: 0.600; --g1: 0.946; --g2: 0.946; --g3: 0.600; --g4: 0.254 }
+ 47.5% { --g0: 0.496; --g1: 0.883; --g2: 0.986; --g3: 0.704; --g4: 0.317 }
+ 50.0% { --g0: 0.400; --g1: 0.800; --g2: 1.000; --g3: 0.800; --g4: 0.400 }
+ 52.5% { --g0: 0.317; --g1: 0.704; --g2: 0.986; --g3: 0.883; --g4: 0.496 }
+ 55.0% { --g0: 0.254; --g1: 0.600; --g2: 0.946; --g3: 0.946; --g4: 0.600 }
+ 57.5% { --g0: 0.214; --g1: 0.496; --g2: 0.883; --g3: 0.986; --g4: 0.704 }
+ 60.0% { --g0: 0.200; --g1: 0.400; --g2: 0.800; --g3: 1.000; --g4: 0.800 }
+ 62.5% { --g0: 0.200; --g1: 0.317; --g2: 0.704; --g3: 0.986; --g4: 0.883 }
+ 65.0% { --g0: 0.200; --g1: 0.254; --g2: 0.600; --g3: 0.946; --g4: 0.946 }
+ 67.5% { --g0: 0.200; --g1: 0.214; --g2: 0.496; --g3: 0.883; --g4: 0.986 }
+ 70.0% { --g0: 0.200; --g1: 0.200; --g2: 0.400; --g3: 0.800; --g4: 1.000 }
+ 72.5% { --g0: 0.200; --g1: 0.200; --g2: 0.317; --g3: 0.704; --g4: 0.986 }
+ 75.0% { --g0: 0.200; --g1: 0.200; --g2: 0.254; --g3: 0.600; --g4: 0.946 }
+ 77.5% { --g0: 0.200; --g1: 0.200; --g2: 0.214; --g3: 0.496; --g4: 0.883 }
+ 80.0% { --g0: 0.200; --g1: 0.200; --g2: 0.200; --g3: 0.400; --g4: 0.800 }
+ 82.5% { --g0: 0.200; --g1: 0.200; --g2: 0.200; --g3: 0.317; --g4: 0.704 }
+ 85.0% { --g0: 0.200; --g1: 0.200; --g2: 0.200; --g3: 0.254; --g4: 0.600 }
+ 87.5% { --g0: 0.200; --g1: 0.200; --g2: 0.200; --g3: 0.214; --g4: 0.496 }
+ 90.0% { --g0: 0.200; --g1: 0.200; --g2: 0.200; --g3: 0.200; --g4: 0.400 }
+ 92.5% { --g0: 0.200; --g1: 0.200; --g2: 0.200; --g3: 0.200; --g4: 0.317 }
+ 95.0% { --g0: 0.200; --g1: 0.200; --g2: 0.200; --g3: 0.200; --g4: 0.254 }
+ 97.5% { --g0: 0.200; --g1: 0.200; --g2: 0.200; --g3: 0.200; --g4: 0.214 }
+ 100.0% { --g0: 0.200; --g1: 0.200; --g2: 0.200; --g3: 0.200; --g4: 0.200 }
+}
+/* обход квадрата: отрезок бежит по скруглённой рамке поверх бледной рамки */
+@property --sa { syntax: "<angle>"; inherits: false; initial-value: 0deg }
+:where(:root[data-spinner=square]) :is(.spinner), [data-spinner=square]:not(:root) .spinner, .spinner[data-spinner=square]:not(#_),
+:where(:root[data-spinner=square]) .btn::after, [data-spinner=square]:not(:root) .btn::after {
+  border: 0; border-radius: 25%; padding: 2px;
+  background: conic-gradient(from var(--sa), #0000 0 55%, var(--sc)), color-mix(in srgb, var(--sc) 18%, transparent);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0) }
+:where(:root[data-spinner=square]) :is(.spinner), [data-spinner=square]:not(:root) .spinner, .spinner[data-spinner=square]:not(#_) { animation: square 1s linear infinite }
+:where(:root[data-spinner=square]) .btn:is(.is-loading, .is-settling)::after, [data-spinner=square]:not(:root) .btn:is(.is-loading, .is-settling)::after { animation: square 1s linear infinite }
+@keyframes square { to { --sa: 360deg } }
+/* дышащая дуга: дуга растёт и укорачивается на ходу, всё вращается */
+@property --at { syntax: "<angle>"; inherits: false; initial-value: 0deg }
+@property --al { syntax: "<angle>"; inherits: false; initial-value: 12deg }
+:where(:root[data-spinner=arc]) :is(.spinner), [data-spinner=arc]:not(:root) .spinner, .spinner[data-spinner=arc]:not(#_),
+:where(:root[data-spinner=arc]) .btn::after, [data-spinner=arc]:not(:root) .btn::after {
+  border: 0; border-radius: 50%; padding: 0; background: conic-gradient(from var(--at), var(--sc) 0 var(--al), #0000 0);
+  -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 2px), #000 calc(100% - 1.5px)); mask: radial-gradient(farthest-side, #0000 calc(100% - 2px), #000 calc(100% - 1.5px)) }
+:where(:root[data-spinner=arc]) :is(.spinner), [data-spinner=arc]:not(:root) .spinner, .spinner[data-spinner=arc]:not(#_) { animation: spin 2.2s linear infinite, arc 1.4s var(--ease-in-out) infinite }
+:where(:root[data-spinner=arc]) .btn:is(.is-loading, .is-settling)::after, [data-spinner=arc]:not(:root) .btn:is(.is-loading, .is-settling)::after { animation: btn-spin 2.2s linear infinite, arc 1.4s var(--ease-in-out) infinite }
+@keyframes arc { 0% { --at: 0deg; --al: 12deg } 50% { --at: 40deg; --al: 260deg } 100% { --at: 360deg; --al: 12deg } }
+/* Невидимое не анимируется: за экраном (theme.js ставит .anim-off) и под модальным окном.
+   Под окном страница затемнена — замершие спиннеры там незаметны, а кадр остаётся окну */
+/* пауза, а не animation: none: снятая анимация убирает лишние слои (приостановленная держит элемент слоем, поверх копятся слои Overlap),
+   но перезапуск десятка спиннеров у края экрана даёт кадр ~100 мс против ~67 с паузой (замер trace.mjs, витрина, CPU ×4) */
+.anim-off { animation-play-state: paused !important }
+/* признак «открыто модальное» — атрибут от scroll-lock.js, а НЕ :root:has(dialog:modal): с :has на корне любое
+   изменение внутри окна заставляет браузер перепроверять стили всей страницы (замер: добавить строку 80–160 мс → 20 мс) */
+:root[data-scroll-locked] body > :not(dialog) :is(.spinner, .skeleton),
+:root[data-scroll-locked] body > :not(dialog) .btn::after { animation-play-state: paused !important }
+.progress { height: 4px; border-radius: var(--r-full); background: var(--tile-strong); overflow: hidden }
+.progress > i { display: block; height: 100%; width: 100%; border-radius: inherit; background: var(--accent);
+  transform-origin: left; transform: scaleX(var(--p, 0)); transition: transform var(--dur-state) var(--ease-out) }
+
+/* ============ Ссылка ============ */
+.link { display: inline-flex; align-items: center; gap: var(--sp-1); color: var(--accent-text); font-weight: var(--w-medium);
+  text-decoration: underline 1px; text-underline-offset: 4px; text-decoration-color: transparent;
+  transition: text-decoration-color var(--hd) var(--ease-hover), outline-color var(--dur-focus) var(--ease-out); --hd: var(--dur-hover-out) }
+@media (hover: hover) and (pointer: fine) { .link:hover { --hd: var(--dur-hover-in); text-decoration-color: color-mix(in srgb, currentColor 60%, transparent) } }
+.arrow { transition: transform var(--hd) var(--ease-out) }
+@media (hover:hover) and (pointer:fine) { :is(.btn, .link):hover .arrow { transform: translateX(2px) } }
+
+/* Уменьшенное движение: остаются fade и цвет, уходят сдвиги, масштаб, вращение лоадеров замедлено */
+@media (prefers-reduced-motion: reduce) {
+  .copy-btn.done .i-copy { transform: none }
+  .copy-btn .i-ok path, .copy-btn.done .i-ok path { stroke-dashoffset: 0; transition: none }
+  .spinner, .btn:is(.is-loading, .is-settling)::after { animation-duration: 1.4s !important }
+  .skeleton { animation: none }
+}

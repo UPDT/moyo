@@ -1,0 +1,5 @@
+/* Бренд Moyo: общий для всех страниц сайта.
+   Знак — иконка приложения (доска го с буквами MOYO), название — Unbounded 600: отличается от Manrope интерфейса.
+   Цвет — режим «Монохром» (mono): кнопки белые на тёмном и чёрные на светлом, как камни го. Единственный цвет на странице — дерево доски (выбор пользователя). */
+.logo { gap: 10px; white-space: nowrap; font-family: "Unbounded", var(--font-sans); font-weight: 600; letter-spacing: -.02em }
+.logo img { width: 26px; height: 26px; flex: none; border-radius: 7px; display: block }

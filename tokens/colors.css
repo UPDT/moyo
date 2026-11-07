@@ -1,0 +1,116 @@
+/* Цвета · источник: Linear · dark-first
+   Компоненты используют ТОЛЬКО эти семантические токены. */
+
+/* Телефон: без синей вспышки при нажатии. Свойство наследуется, поэтому одно правило на всё:
+   ссылки, кнопки, вкладки, аккордеоны, свои элементы. Реакция на нажатие — наш :active и hover */
+html { -webkit-tap-highlight-color: transparent }
+
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Слои — ступени по 1–2% светлоты */
+  --bg:             #08090a;  /* страница */
+  --bg-raised:      #0f1011;  /* панели, сайдбар, шапка */
+  --surface:        #141516;  /* карточки */
+  --surface-hover:  #191a1b;
+  --surface-active: #1c1c1f;
+  --surface-strong: #232326;  /* поля, выбранные элементы */
+  --overlay:        #000000d9;
+
+  /* Рамки — полупрозрачные, работают на любом слое */
+  --border-subtle:  #ffffff0d;
+  --border:         #ffffff14;
+  --border-strong:  #ffffff24;
+
+  /* Текст — 4 уровня */
+  --text:           #f7f8f8;
+  --text-secondary: #d0d6e0;
+  --text-muted:     #8a8f98;
+  --text-faint:     #62666d;
+
+  /* Акцент — глубокий изумрудный #0a806c, скупо */
+  --accent:         #0a806c;  /* заливка */
+  --accent-hover:   #09715f;  /* наведение — ТЕМНЕЕ заливки в обеих темах (пользователь, 2026-11-05); = accent + 12% чёрного */
+  --accent-fg:      #ffffff;
+  --accent-text:    #34c2a7;  /* ссылки и акцентный текст — светлее заливки, чтобы не был мутным */
+  --accent-tint:    #0a221e;  /* подложка бейджа/выделения */
+  --accent-border:  #0a806c66;
+  --focus:          #1fa88f;
+  --focus-field:    #207e6e;  /* фокус поля: акцент, приглушённый к серому — 3.87:1 к фону поля (яркий --focus был 6.4:1 и «светился») */
+
+  /* Главная CTA на тёмном — светлая */
+  --invert:         #f7f8f8;  /* в покое светлее … */
+  --invert-hover:   #d9dadd;  /* … при наведении темнее (пользователь, 2026-11-05) */
+  --invert-fg:      #08090a;
+
+  /* Статусы */
+  --success:        #27a644;
+  --success-text:   #4cc767;
+  --success-tint:   #27a6441f;
+  --warning:        #f0bf00;
+  --warning-text:   #f0bf00;
+  --warning-tint:   #f0bf001a;
+  --danger:         #eb5757;
+  --danger-text:    #f27474;
+  --danger-tint:    #eb57571f;
+  --info:           #4ea7fc;
+  --info-text:      #4ea7fc;
+  --info-tint:      #4ea7fc1f;
+
+  /* Глубина в тёмной теме — слоями, не тенями */
+  --shadow-sm: 0 0 #0000;  /* не none: none внутри списка теней ломает всё правило */
+  --shadow-md: 0 8px 24px #00000066;
+  --shadow-lg: 0 16px 48px #00000080;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  --bg:             #ffffff;
+  --bg-raised:      #f9f8f9;
+  --surface:        #ffffff;
+  --surface-hover:  #f4f2f4;
+  --surface-active: #eeedef;
+  --surface-strong: #e9e8ea;
+  --overlay:        #00000066;
+
+  --border-subtle:  #0000000d;
+  --border:         #00000014;
+  --border-strong:  #00000024;
+
+  --text:           #282a2f;
+  --text-secondary: #3c4149;
+  --text-muted:     #6f6e77;
+  --text-faint:     #86848d;
+
+  --accent:         #0a806c;
+  --accent-hover:   #097361;
+  --accent-fg:      #ffffff;
+  --accent-text:    #08735f;
+  --accent-tint:    #e7f2f0;
+  --accent-border:  #0a806c4d;
+  --focus:          #0a806c;
+  --focus-field:    #358a7d;  /* фокус поля: акцент, приглушённый к серому — 3.9:1 к фону поля */
+
+  --invert:         #282a2f;
+  --invert-hover:   #08090a;
+  --invert-fg:      #ffffff;
+
+  --success:        #27a644;
+  --success-text:   #1d7f34;
+  --success-tint:   #27a64414;
+  --warning:        #f0bf00;
+  --warning-text:   #8a6a00;
+  --warning-tint:   #f0bf001f;
+  --danger:         #eb5757;
+  --danger-text:    #c93b3b;
+  --danger-tint:    #eb575714;
+  --info:           #4ea7fc;
+  --info-text:      #1a6ab8;
+  --info-tint:      #4ea7fc14;
+
+  --shadow-sm: 0 1px 1px #00000017;
+  --shadow-md: 0 3px 12px #00000017;
+  --shadow-lg: 0 7px 24px #0000000f;
+}

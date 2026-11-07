@@ -1,0 +1,62 @@
+/* Типографика · строго и ровно
+   Шрифт один — Inter (переменный, с оптическим размером opsz: крупные кегли
+   автоматически получают «дисплейный» рисунок). Код и служебные подписи — JetBrains Mono.
+   Шкала основана на Supabase (12/14/16/22/34/46), уплотнена для интерфейса (13).
+   Межстрочный интервал — всегда кратен 4px: строки ложатся на ту же сетку, что и отступы.
+   Подключение:
+   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"> */
+
+:root {
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Насыщенность: три значения, не больше (как у Linear — промежуточные веса переменного Inter) */
+  --w-regular: 400;   /* текст */
+  --w-medium:  510;   /* интерфейс: кнопки, навигация, пункты, крупные заголовки */
+  --w-semibold: 590;  /* мелкие заголовки (карточки, группы) — где нужен вес без роста кегля */
+
+  /*            кегль          интервал        трекинг */
+  --fs-2xs: 11px; --lh-2xs: 16px; --ls-2xs:  0;        /* только моно-подписи, капсом */
+  --fs-xs:  12px; --lh-xs:  16px; --ls-xs:   0;        /* бейджи, счётчики, мета */
+  --fs-sm:  13px; --lh-sm:  20px; --ls-sm:  -.003em;   /* второстепенный UI: описания пунктов, подсказки */
+  --fs-base:14px; --lh-base:20px; --ls-base:-.006em;   /* UI по умолчанию: кнопки, поля, меню, навигация */
+  --fs-md:  16px; --lh-md:  24px; --ls-md:  -.011em;   /* текст абзацев, заголовки карточек */
+  --fs-lg:  18px; --lh-lg:  28px; --ls-lg:  -.014em;   /* крупный UI: мобильное меню */
+  --fs-xl:  22px; --lh-xl:  32px; --ls-xl:  -.017em;   /* лид под заголовком */
+  --fs-2xl: 28px; --lh-2xl: 36px; --ls-2xl: -.021em;   /* подзаголовки секций */
+  --fs-3xl: 34px; --lh-3xl: 40px; --ls-3xl: -.024em;   /* заголовки секций */
+  --fs-4xl: 46px; --lh-4xl: 52px; --ls-4xl: -.028em;   /* главный заголовок страницы */
+
+  /* Моно-подпись группы (капс) */
+  --label-tracking: .08em;
+
+  /* Длина строки текста */
+  --measure: 60ch;        /* абзац */
+  --measure-narrow: 44ch; /* лид, описания */
+  --measure-title: 24ch;  /* заголовок: две фразы — две строки, без висящего слова */
+}
+
+/* Заголовок главной на телефоне — на ступень меньше */
+@media (max-width: 720px) {
+  :root { --fs-4xl: 34px; --lh-4xl: 40px; --ls-4xl: -.024em;
+          --fs-3xl: 28px; --lh-3xl: 36px; --ls-3xl: -.021em; }
+}
+
+/* Классы ступеней: кегль + интервал + трекинг всегда вместе — по отдельности не задаются */
+.t-2xs  { font-size: var(--fs-2xs);  line-height: var(--lh-2xs);  letter-spacing: var(--ls-2xs) }
+.t-xs   { font-size: var(--fs-xs);   line-height: var(--lh-xs);   letter-spacing: var(--ls-xs) }
+.t-sm   { font-size: var(--fs-sm);   line-height: var(--lh-sm);   letter-spacing: var(--ls-sm) }
+.t-base { font-size: var(--fs-base); line-height: var(--lh-base); letter-spacing: var(--ls-base) }
+.t-md   { font-size: var(--fs-md);   line-height: var(--lh-md);   letter-spacing: var(--ls-md) }
+.t-lg   { font-size: var(--fs-lg);   line-height: var(--lh-lg);   letter-spacing: var(--ls-lg) }
+.t-xl   { font-size: var(--fs-xl);   line-height: var(--lh-xl);   letter-spacing: var(--ls-xl) }
+.t-2xl  { font-size: var(--fs-2xl);  line-height: var(--lh-2xl);  letter-spacing: var(--ls-2xl) }
+.t-3xl  { font-size: var(--fs-3xl);  line-height: var(--lh-3xl);  letter-spacing: var(--ls-3xl) }
+.t-4xl  { font-size: var(--fs-4xl);  line-height: var(--lh-4xl);  letter-spacing: var(--ls-4xl) }
+
+/* Моно-подпись группы: «ВОЗМОЖНОСТИ», «БЛОГ» */
+.t-label { font: var(--w-medium) var(--fs-2xs)/var(--lh-2xs) var(--font-mono);
+           letter-spacing: var(--label-tracking); text-transform: uppercase; color: var(--text-faint) }
+
+/* Цифры в таблицах, счётчиках, ценах — одинаковой ширины, чтобы столбцы не прыгали */
+.tnum { font-variant-numeric: tabular-nums }

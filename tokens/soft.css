@@ -1,0 +1,357 @@
+/* Мягкий стиль · те же компоненты, другой характер
+   Подключается последним, после всех токенов и компонентов. Меняет только форму:
+   - шрифт Manrope (кириллица, переменный 200–800), чуть крупнее кегль и свободнее строки;
+   - больше воздуха: выше элементы управления, шире отступы, больше зазоры;
+   - круглее: кнопки и чипы таблетками, карточки и панели с крупными углами;
+   - движение длиннее и мягче, но по тем же правилам (opacity/transform, ease-out, без отскоков).
+   Цвета, разметка и поведение — общие с основным стилем.
+   Подключение шрифта:
+   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"> */
+
+:root {
+  /* Шрифт */
+  --font-sans: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --w-medium: 560;
+  --w-semibold: 650;
+  --fs-sm:  14px; --lh-sm:  20px; --ls-sm:  0;
+  --fs-base:15px; --lh-base:24px; --ls-base:0;
+  --fs-md:  17px; --lh-md:  28px; --ls-md: -.005em;
+  --fs-lg:  19px; --lh-lg:  28px; --ls-lg: -.01em;
+  --fs-xl:  22px; --lh-xl:  32px; --ls-xl: -.015em;
+  --fs-2xl: 30px; --lh-2xl: 40px; --ls-2xl: -.02em;
+  --fs-3xl: 38px; --lh-3xl: 48px; --ls-3xl: -.025em;
+  --fs-4xl: 48px; --lh-4xl: 56px; --ls-4xl: -.03em;   /* 52 не помещал заголовок первого экрана в колонку: «Вёрстка» оставалась одна на строке */
+
+  /* Воздух: шкала та же по смыслу, шаги крупнее (сетка 4px сохраняется) */
+  --sp-3:  14px;
+  --sp-4:  20px;
+  --sp-5:  24px;
+  --sp-6:  32px;
+  --sp-8:  40px;
+  --sp-12: 64px;
+  --sp-16: 80px;
+  --sp-24: 128px;
+  --grid-gap: var(--sp-5);
+
+  /* Высоты */
+  --h-sm: 36px;
+  --h-md: 44px;
+  --h-lg: 52px;
+  --h-xl: 60px;
+  --h-touch: 48px;
+
+  /* Углы: крупнее; вложенный по-прежнему = внешний − отступ */
+  --r-xs:  10px;
+  --r-sm:  14px;
+  --r-md:  18px;
+  --r-lg:  22px;
+  --r-xl:  28px;
+
+  /* Движение: дольше и мягче. Отклик на нажатие остаётся быстрым — иначе кнопка «вязнет» */
+  --dur-hover-in:  220ms;
+  --dur-hover-out: 480ms;
+  --dur-icon-in:   320ms;
+  --dur-press-out: 380ms;
+  --dur-focus:     260ms;
+  --dur-item-out:  240ms;
+  --dur-exit:      220ms;
+  --dur-enter:     320ms;
+  --dur-toast:     380ms;
+  --dur-state:     420ms;
+  --dur-reveal:    900ms;
+  --dur-morph:     340ms;
+  --dur-expand:    420ms;
+  --dur-collapse:  300ms;
+  --dur-sheet:     480ms;
+  --dur-sheet-out: 320ms;
+  --dur-slide:     520ms;
+  --dur-swap-out:  280ms;
+  --dur-swap-in:   520ms;
+  --stagger:        70ms;
+  --ease-out:    cubic-bezier(.22, 1, .36, 1);
+  --ease-hover:  cubic-bezier(.4, 0, .2, 1);
+  --shift-sm: 6px;
+  --shift-md: 12px;
+  --scale-in: .96;
+}
+
+@media (max-width: 720px) {
+  :root { --section-y: var(--sp-16); --sp-24: 96px; --sp-16: 64px;
+          /* заголовки на телефоне на ступень меньше, как в строгом (type.css): иначе :root выше перебивал его и было 52 и 38 */
+          --fs-4xl: 36px; --lh-4xl: 44px; --ls-4xl: -.025em;
+          --fs-3xl: 30px; --lh-3xl: 38px; --ls-3xl: -.022em }
+}
+/* Телефон: шаги от 16 и выше — как в строгом (20 → 16, 24 → 20, 32 → 24, 40 → 32). Иначе карточка с полем 32 оставляет внутри 248px из 360,
+   и короткие подписи («Пригласить команду», «Бюджет 2026.xlsx») переносятся. Воздух мягкого стиля держат радиусы, шрифт и высоты */
+@media (max-width: 520px) {
+  :root { --sp-3: 12px; --sp-4: 16px; --sp-5: 20px; --sp-6: 24px; --sp-8: 32px }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --shift-sm: 0px; --shift-md: 0px; --scale-in: 1; --stagger: 0ms; --dur-reveal: 240ms }
+}
+
+/* Кнопки и поля — таблетками: в мягком стиле это главный признак */
+.btn, .btn-sm, .btn-lg, .btn-xl, .btn-touch { border-radius: var(--r-full) }
+.btn { padding: 0 var(--sp-5) }
+.btn-sm { padding: 0 var(--sp-4) }
+.btn-lg { padding: 0 var(--sp-6) }
+.btn-xl { padding: 0 var(--sp-8); font-size: var(--fs-lg); line-height: var(--lh-lg); letter-spacing: var(--ls-lg) }
+.icon-btn, .icon-btn-lg { border-radius: var(--r-full) }
+.input, .stepper { border-radius: var(--r-md); padding-inline: var(--sp-4) }
+.select-trigger { padding-left: var(--sp-4) }   /* текст выбора на одной линии с текстом полей */
+.input-wrap > .lucide ~ .input { padding-left: 44px }     /* 14 + иконка 16 + 14 */
+.input-wrap:has(.trail) .input { padding-right: 52px }
+textarea.input { border-radius: var(--r-lg) }
+
+/* ================= Компоненты по одному =================
+   У части компонентов размеры записаны прямо в их правилах, а не через токены, поэтому переводим их здесь.
+   Принцип везде один: цель крупнее на 4–8px, углы круглее, вместо линий мягкие плашки. */
+
+/* Выпадающий список, пункт меню, подсказка */
+.option, .menu-item { padding: 10px var(--sp-3); border-radius: var(--r-sm) }
+.menu:not(.cal-pop), .listbox { padding: 8px }   /* у календаря свои поля: под них рассчитана полоса пресетов */
+.menu-sep { margin: 8px 12px }
+.tip { padding: 6px var(--sp-3); border-radius: var(--r-full) }
+.kbd { min-width: 24px; height: 24px; padding: 0 6px; border-radius: var(--r-xs) }
+
+/* Кнопки-иконки мелких размеров */
+.icon-btn-xs { width: 28px; height: 28px }
+.icon-btn-sm { width: 32px; height: 32px }
+
+/* Чекбокс, радио, переключатель: крупнее и круглее */
+.check, .radio { width: 20px; height: 20px }
+.check { border-radius: 7px }
+.check::after { width: 10px; height: 6px; border-left-width: 2px; border-bottom-width: 2px }
+.check:indeterminate::after { width: 10px }
+.radio::after { width: 8px; height: 8px }
+.switch { width: 44px; height: 26px }
+.switch::after { top: 3px; left: 3px; width: 20px; height: 20px; box-shadow: 0 1px 3px #00000040 }
+.switch:checked::after { transform: translateX(18px) }
+.choice { gap: var(--sp-3) }
+
+/* Сегменты и группа переключателей: трек и бегунок таблетками */
+.seg, .tgl { padding: 4px; gap: 4px; border-radius: var(--r-full) }
+.seg button { height: 36px; padding: 0 var(--sp-4); border-radius: var(--r-full) }
+.seg .thumb { top: 4px; height: 36px; border-radius: var(--r-full) }
+@media (max-width: 420px) { .seg button { padding: 0 var(--sp-3) } }
+.tgl button { min-width: 36px; height: 36px; padding: 0 10px; border-radius: var(--r-full) }
+.tgl .tgl-sep { margin: 8px 2px }
+
+/* Вкладки: вместо линии под текстом мягкая плашка за активной вкладкой */
+.tabs { gap: 4px; padding: 4px; box-shadow: none; border-radius: var(--r-full); background: var(--fill); width: max-content; max-width: 100%; overflow-x: auto; scrollbar-width: none }
+.tab { z-index: 1; height: 40px; padding: 0 var(--sp-4); border-radius: var(--r-full); white-space: nowrap }
+.tabs .line { z-index: 0; top: 4px; bottom: auto; height: 40px; border-radius: var(--r-full); background: color-mix(in srgb, var(--text) 13%, transparent) }
+[data-theme="light"] .tabs .line { background: var(--surface); box-shadow: 0 1px 3px #0000001f }
+
+/* Бейдж, дельта, счётчик */
+.badge { height: 26px; padding: 0 var(--sp-3) }
+.badge-mono { border-radius: var(--r-full) }
+.delta { height: 24px; padding: 0 var(--sp-2) }
+.count { min-width: 18px; height: 18px; line-height: 18px; padding: 0 5px }
+
+/* Сообщение */
+.alert { padding: var(--sp-4) var(--sp-5); border-radius: var(--r-lg) }
+
+/* Таблица: строки выше, плитка наведения круглее */
+.table-wrap { border-radius: var(--r-xl); padding: var(--sp-2) var(--sp-3) }
+.table th { height: 44px; padding: 0 var(--sp-4) }
+.table td { height: 52px; padding: 0 var(--sp-4) }
+.table tbody tr :is(td, th):first-child { border-radius: var(--r-md) 0 0 var(--r-md) }
+.table tbody tr :is(td, th):last-child { border-radius: 0 var(--r-md) var(--r-md) 0 }
+.table tbody tr:not(:first-child) :is(td, th):first-child::before { left: var(--sp-4) }
+.table tbody tr:not(:first-child) :is(td, th):last-child::before { right: var(--sp-4) }
+.table .cb { width: 48px }
+.th-sort { padding: 4px var(--sp-2); border-radius: var(--r-full) }
+.bulk { padding: 6px 6px 6px var(--sp-4); border-radius: var(--r-full) }
+
+/* Аватары на шаг крупнее */
+.avatar { width: 28px; height: 28px }
+.avatar-md, .members .avatar { width: 36px; height: 36px }
+.avatar-xs { width: 24px; height: 24px; font-size: 10px }
+.avatar-lg { width: 48px; height: 48px }
+.avatar-xl { width: 56px; height: 56px }
+
+/* Прогресс и полосы толще */
+.progress, .strength-bar i { height: 6px }
+.file .progress { height: 4px }
+
+/* Ввод: код, число, теги, цвет, календарь, загрузка */
+.otp input { flex-basis: 48px; width: 48px; height: 56px; border-radius: var(--r-md) }
+.otp { gap: var(--sp-2) }
+.stepper { padding: 0 6px; border-radius: var(--r-full) }
+.stepper button { width: 32px; height: 32px; border-radius: var(--r-full) }
+.tag { height: 28px; padding: 0 4px 0 var(--sp-3); border-radius: var(--r-full) }
+.tag button { width: 22px; height: 22px; border-radius: var(--r-full) }
+.tag-more { height: 28px; border-radius: var(--r-full) }
+.multi { padding: 8px 40px 8px 8px; border-radius: var(--r-lg) }
+.multi input { height: 28px }
+.swatch { width: 28px; height: 28px }
+.hex { width: 164px }
+.hex .preview { left: 12px; border-radius: 50% }
+.cal { width: 288px }
+.cal-grid { grid-template-columns: repeat(7, 40px) }
+.cal-cell { height: 40px }
+.cal-day { width: 36px; height: 36px; border-radius: var(--r-full) }
+.cal-head { height: 36px }
+.dz { border-radius: var(--r-xl) }
+.dz .dz-ic { width: 48px; height: 48px; border-radius: var(--r-full) }
+.file-ic { width: 40px; height: 40px; border-radius: var(--r-md) }
+
+/* Хлебные крошки, страницы, шаги */
+.crumbs a { padding: 2px 6px; margin: 0 -6px; border-radius: var(--r-full) }
+.crumb-more { width: 28px; height: 24px; border-radius: var(--r-full) }
+.pager, .pager-nums { gap: 4px }
+.pager button, .pager .gap { min-width: 36px; height: 36px; border-radius: var(--r-full) }
+.pager-plate { height: 36px; border-radius: var(--r-full) }
+.steps li::before, .steps li::after { height: 6px }
+.steps-v li { grid-template-columns: 6px 24px minmax(0, 1fr) }
+.steps-v li::after { width: 6px }
+@media (max-width: 720px) { .steps-auto li { grid-template-columns: 6px 24px minmax(0, 1fr) } .steps-auto li::after { width: 6px } }
+.steps-v li::before { height: auto }   /* в столбик полоса во всю высоту шага, а не 6px (иначе превращается в точку) */
+.steps-v li::after { height: 100% }
+@media (max-width: 720px) { .steps-auto li::before { height: auto } .steps-auto li::after { height: 100% } }
+.step-dot { height: 24px; line-height: 24px }
+.step-dot svg { width: 18px; height: 18px }
+
+/* Боковое меню */
+.side-head, .side-ws, .side-foot { height: 48px }
+.side-ws, .side-foot { padding: 0 8px; border-radius: var(--r-md) }
+/* свёрнутое меню: все значки на одной оси 30px от края — поле 8 + отступ пункта 14 + половина значка 8;
+   логотип и аватар 28px: 8 + 8 + 14 = 30. Ширина полосы — две таких оси */
+.side.collapsed { --side-w: 60px }
+.ws-logo { width: 28px; height: 28px; border-radius: var(--r-sm) }
+.side-search { height: 40px; padding: 0 14px; border-radius: var(--r-full) }
+.side-nav, .side-sub > div { gap: 4px }
+.side-item { height: 40px; padding: 0 14px; border-radius: var(--r-full) }
+.side-label { height: 32px; padding: 0 14px; border-radius: var(--r-full) }
+.side-count { min-width: 22px; height: 22px }
+.side-dot { width: 10px; height: 10px; margin: 0 3px; border-radius: 50% }
+
+/* Оглавление */
+.onpage a { padding: 6px var(--sp-4); border-radius: 0 var(--r-full) var(--r-full) 0 }
+.onpage-mark { width: 3px; border-radius: 3px }
+
+/* Поповер, контекстное меню, шторки, уведомления, диалоги, палитра */
+.pop { padding: var(--sp-5); border-radius: var(--r-xl) }
+.ctx-row { height: 48px; padding: 0 var(--sp-4); border-radius: var(--r-md) }
+.ctx-row + .ctx-row::before { left: var(--sp-4); right: var(--sp-4) }
+.sheet-grab { height: 28px }
+.sheet-grab::before { width: 44px; height: 5px }
+.tst { padding: var(--sp-4) var(--sp-4) var(--sp-4) var(--sp-5); border-radius: var(--r-xl) }
+.toast-x { width: 32px; height: 32px; border-radius: var(--r-full) }
+.role-btn { height: 32px; padding: 0 4px 0 var(--sp-3); border-radius: var(--r-full) }
+.dns > div { min-height: 52px }
+.key-row { min-height: 44px }
+.cmdk { border-radius: var(--r-xl) }
+.cmdk-in { height: 60px; padding: 0 var(--sp-5) }
+.cmdk-list { padding: var(--sp-3) }
+.cmdk-item { height: 48px; padding: 0 var(--sp-4); border-radius: var(--r-md) }
+.cmdk-foot { height: 48px; padding: 0 var(--sp-5) }
+
+/* Данные: вопросы, пустые состояния, метрики, списки, лента, комментарии, код */
+.acc-item > summary { min-height: 64px; padding: var(--sp-4) 0; border-radius: var(--r-sm) }
+.state { border-radius: var(--r-xl) }
+.state-ic { width: 52px; height: 52px; border-radius: var(--r-full) }
+.spark { height: 48px }
+.alist { padding: 6px; border-radius: var(--r-xl) }
+.alist-row { grid-template-columns: 40px 1fr auto; min-height: 68px; padding: var(--sp-3) var(--sp-4); border-radius: var(--r-md) }
+.alist-row + .alist-row::before { left: 72px; right: var(--sp-4) }
+.alist-ic { width: 40px; height: 40px; border-radius: var(--r-full) }
+.tl li:not(:last-child)::before { left: 13px; top: 32px }
+.tl-mark { width: 28px; height: 28px }
+.react { height: 30px; padding: 0 var(--sp-3) }
+.cmt-reply { height: 30px; padding: 0 var(--sp-3); border-radius: var(--r-full) }
+/* Поле комментария: кнопка-таблетка 36 в углу. Угол = 18 + поле 10 — контуры параллельны; текст и подсказка в 20px от края */
+.composer-box { padding: 10px; border-radius: 28px }
+.composer-box textarea { padding: 6px 10px }
+.composer-foot .hint { padding-left: 10px }
+.code { border-radius: var(--r-xl) }
+.code-head { height: 48px; padding: 0 var(--sp-2) 0 var(--sp-5) }
+code.inline { padding: 2px 7px }
+
+/* Баннер, список уведомлений */
+.banner { min-height: 48px; padding: var(--sp-3) 56px }
+@container (max-width: 560px) { .banner { padding-left: var(--sp-5) } }
+.banner-x { width: 32px; height: 32px; border-radius: var(--r-full) }
+.notifs { padding: 8px }
+.notif { grid-template-columns: 36px minmax(0, 1fr); padding: var(--sp-4) var(--sp-8) var(--sp-4) var(--sp-4); border-radius: var(--r-md) }
+.notif + .notif::before { left: 68px; right: var(--sp-4) }
+.unread { top: 22px; right: var(--sp-5) }
+
+/* Шапка и мобильное меню */
+.site-header { height: 72px }
+.logo i { width: 24px; height: 24px; border-radius: var(--r-sm) }
+.nav-trigger { height: 40px; padding: 0 var(--sp-4) }
+.mega-ic { width: 40px; height: 40px; border-radius: var(--r-md) }
+.story-thumb { border-radius: var(--r-md) }
+.acct-btn, .nav-av { width: 36px; height: 36px }
+.tseg { padding: 3px; gap: 3px; border-radius: var(--r-full) }
+.tseg-b { width: 28px; height: 28px; border-radius: var(--r-full) }
+.tseg-b .sw, .accp .sw, .mt-acc .sw { border-radius: 50% }
+.accp-btn { height: 36px; padding: 0 10px 0 12px; border-radius: var(--r-full) }
+.burger { width: 44px; height: 44px; margin-right: -12px; border-radius: var(--r-full) }   /* линии считаются от центра (nav.css); -12: правый край линий на том же месте, что в строгом */
+.mrow { min-height: 56px; border-radius: var(--r-lg) }
+.mtheme .tseg-b { width: 36px; height: 36px }
+:root.nav-compact .mnav { top: 72px }
+.acct-menu { top: calc(100% + 18px + var(--sp-2)) }
+.mnav-actions .btn { border-radius: var(--r-full) }   /* в мобильном меню своё правило радиуса — тоже таблетка */
+
+/* ================= Углы: либо таблетка, либо мягкий прямоугольник =================
+   Радиус «между» (30–49% высоты) читается как ошибка: ни круглое, ни квадратное.
+   Однострочное нажимаемое (поля, выпадающие, пункты меню, строки мобильного меню) — таблетка.
+   Многострочное и крупное (карточки, панели, многострочные поля, ячейки кода) — радиус не больше четверти высоты. */
+.input, .select-trigger, .date-trigger, .side-ws, .mrow,
+.menu-item, .option, .ctx-row, .cmdk-item, .acct-item, .acct-row { border-radius: var(--r-full) }
+textarea.input, .textarea { border-radius: var(--r-lg) }
+.otp input { border-radius: 12px }   /* ячейка 48 в ширину: четверть — 12 */
+/* Плавающие меню и списки. Пользователь: «сильные закругления с маленькими отступами смотрится ужасно» — было угол 28 при поле 4–6.
+   Правило: угол = радиус вложенного пункта (таблетка 36 → 18) + поле 8, контуры идут параллельно; текст, иконки и линии — не ближе 20px к краю */
+.menu, .listbox, .acct-menu, .notifs { border-radius: 26px }
+/* Мультивыбор растёт в высоту: угол 22 — при одной строке (44) это таблетка, при двух — мягкий прямоугольник.
+   Общее правило «.input — таблетка» сюда не годится: на двух строках получается овал */
+.input.multi { border-radius: var(--r-lg) }
+.multi input { min-width: 20px }   /* место для ввода не уводит теги на вторую пустую строку */
+/* Мобильное меню, ряды «Акцент» и «Режим». Общее правило .mtheme .tseg-b (36px) перебивало ширину кружков акцента:
+   10 × 36 + зазоры шире экрана — ряд уезжал вправо и тянул за собой остальные. Кружки делят ширину поровну */
+.mt-acc .tseg { grid-template-columns: repeat(9, minmax(0, 1fr)) }
+.mt-acc .tseg-b { width: auto }
+/* «Режим» — сеткой 2 × 2 под названием (nav.css). Сегменты в два ряда — мягкий прямоугольник, не овал: угол 22 при высоте ~80 */
+.mtheme:has(.tseg-b.tx) .tseg { border-radius: var(--r-lg) }
+/* Акцент: подсветка выбранного — ровный круг (ячейка уже 36px — был овал), угол рамки = поле 3 + радиус круга 18, чтобы контуры шли параллельно */
+.mt-acc .tseg { border-radius: 21px }
+.mt-acc .tseg-b { width: min(36px, 100%); height: auto; aspect-ratio: 1; justify-self: center }
+.mtheme .tseg-b.tx { padding: 0 var(--sp-2) }
+/* Поле с копированием: кнопка 32 вместо 28 — отступы считаются от неё */
+.copy-field { --cf-gap: calc((var(--h-md) - 32px) / 2) }
+.copy-field .input { padding-right: calc(var(--cf-gap) + 32px + var(--sp-2)) }
+/* Меню аккаунта: поле 8, пункты с полем 12 — иконки и текст в 20px от края; шапка и линии на той же вертикали.
+   Шире (280), чтобы крупный переключатель темы не упирался в край */
+.acct-menu { width: 280px; padding: 8px }
+.acct-item { padding: 0 12px }
+.acct-row { padding: 0 0 0 12px }   /* переключатель-таблетка в поле 8, как заливки пунктов: его скругление параллельно углу меню (26 = 18 + 8). Пользователь: выход за линию «лучше смотрелось за счёт округления» */
+.acct-head { padding: 10px 12px 8px }
+.acct-group::before { margin: 8px 12px }
+
+/* Телефон, ряды: значок списка 36 вместо 40, у сообщения поле 16 — стоит в конце, чтобы перекрыть правила компонентов выше */
+@media (max-width: 520px) {
+  .alist-row { grid-template-columns: 36px 1fr auto }
+  .alist-ic { width: 36px; height: 36px }
+  .alist-row + .alist-row::before { left: calc(var(--sp-4) + 36px + var(--sp-3)) }
+  .alert { padding-inline: var(--sp-4) }
+}
+
+/* Плитка «текст слева, сцена справа» на средней ширине (561–860): у мягкого шрифт заголовка крупнее, колонка 260 давала
+   «Без привязки к подрядчику» в две строки. Колонка текста от 320 */
+@container (min-width: 561px) and (max-width: 860px) {
+  .tile:not(.t-2, .stack) { grid-template-columns: minmax(320px, 1fr) minmax(0, 1.4fr) }
+}
+
+/* Таблица сравнения на телефоне (.table-stack, components.css): поля ячеек выше (0 16px) перебивали её нулевые —
+   «Без лимита» переносился. Возвращаем раскладку стопки, и рамка снова не нужна */
+@media (max-width: 640px) {
+  .table-wrap:has(> .table-stack) { padding: 0; border-radius: 0 }
+  .table-stack :is(th, td) { height: auto; padding: 0; border-radius: 0 }
+  .table-stack thead th { padding: var(--sp-3) 0 }
+  .table-stack tbody th { padding-top: var(--sp-3) }
+  .table-stack tbody tr :is(td, th)::before { display: none }
+}

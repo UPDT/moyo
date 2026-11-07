@@ -1,0 +1,83 @@
+/* Режимы цвета — <html data-palette="…">. Подключать ПОСЛЕ colors.css.
+   ┌──────────────┬──────────────────────────────────────────────────────────────────────────────┐
+   │ (нет / accent)│ «Монохром с акцентом» — как Linear. База: tokens/colors.css (эталон сохранён    │
+   │              │  в tokens/palettes/mono-accent.saved.css). Акцент — редко: CTA-акцент, ссылки,  │
+   │              │  фокус, отметки. Главная кнопка — светлая/тёмная инверсия.                     │
+   │ mono         │ «Монохром» — как Vercel. Ни одного акцентного цвета: акцент = инверсия,        │
+   │              │  ссылки = текст, подложки = серый, фокус серый. Цветные — только статусы.     │
+   │ tint         │ «Акцентная» — как Supabase. Главная кнопка — акцент, акцент пронизывает тему.  │
+   │              │  Тёмная и светлая устроены ПО-РАЗНОМУ (как у Supabase):                       │
+   │              │   тёмная — серые с оттенком акцента, кнопка глубже акцента, текст акцента мятный;│
+   │              │   светлая — серые чисто нейтральные, кнопка = акцент, подложки бледные.        │
+   └──────────────┴──────────────────────────────────────────────────────────────────────────────┘
+   Светлота слоёв и текста во всех режимах одна и та же — меняются только оттенок и роль акцента,
+   поэтому контраст и иерархия не «плывут» при переключении. Статусы (успех/ошибка/…) не трогаем нигде. */
+
+/* ===== Монохром (Vercel) ===== */
+:root[data-palette="mono"]:not([data-theme="light"]) {
+  --bg: #090909; --bg-raised: #101010; --surface: #151515; --surface-hover: #1a1a1a; --surface-active: #1c1c1c; --surface-strong: #232323;
+  --border-subtle: #ffffff0d; --border: #ffffff14; --border-strong: #ffffff24;
+  --text: #f8f8f8; --text-secondary: #d5d5d5; --text-muted: #8f8f8f; --text-faint: #666666;
+  --invert: #f8f8f8; --invert-hover: #d9d9d9; --invert-fg: #090909;
+  --accent: var(--invert); --accent-hover: var(--invert-hover); --accent-fg: var(--invert-fg);
+  --accent-text: var(--text); --accent-tint: var(--surface-strong); --accent-border: var(--border-strong);
+  --focus: #a3a3a3;          /* 7.8:1 к фону — заметен, но не цвет */
+  --focus-field: #6e6e6e;    /* 3.3:1 к полю */
+}
+:root[data-palette="mono"][data-theme="light"] {
+  --bg: #ffffff; --bg-raised: #f8f8f8; --surface: #ffffff; --surface-hover: #f3f3f3; --surface-active: #ededed; --surface-strong: #e8e8e8;
+  --text: #2a2a2a; --text-secondary: #414141; --text-muted: #6f6f6f; --text-faint: #858585;
+  --invert: #2a2a2a; --invert-hover: #090909; --invert-fg: #ffffff;
+  --accent: var(--invert); --accent-hover: var(--invert-hover); --accent-fg: var(--invert-fg);
+  --accent-text: var(--text); --accent-tint: var(--surface-strong); --accent-border: var(--border-strong);
+  --focus: #555555; --focus-field: #8a8a8a;
+}
+
+/* ===== Акцентная (Supabase) ===== */
+/* тёмная: серые с ЛЁГКИМ оттенком акцента (OKLCH, тон 176° = тон #0a806c). Насыщенность 0.002–0.008 — как у Supabase (0.0025):
+   первая версия 0.006–0.02 была «слишком ярко выраженной» (пользователь) — зеленью отдавало всё. Оттенок чувствуется, но не виден */
+:root[data-palette="tint"]:not([data-theme="light"]) {
+  --bg: #080909; --bg-raised: #0e1010; --surface: #131615; --surface-hover: #191c1b; --surface-active: #1c201f; --surface-strong: #222524;
+  --overlay: #000101d9;
+  --border-subtle: #edf8f50d; --border: #edf8f514; --border-strong: #edf8f524;
+  --text: #f5f7f7; --text-secondary: #d2d7d6; --text-muted: #8c9290; --text-faint: #646967;
+  --accent: #0e7461;         /* одна заливка на всё, глубже базового #0a806c (у Supabase кнопка #006239 при бренде #3ecf8e); 3.2:1 к карточке — отметки читаются, белый на ней 5.7:1 */
+  --accent-hover: #0b6756;
+  --accent-border: #0e746199;
+  --accent-text: #73c3af;    /* приглушённый мятный, 9.6:1 к фону (был #65d5bb — кричал) */
+  --accent-tint: #13221e;
+  --invert: var(--accent);   /* главная кнопка = акцент */
+  --invert-hover: var(--accent-hover);
+  --invert-fg: var(--accent-fg);
+}
+/* светлая: серые нейтральные, без оттенка — цвет несёт только акцент */
+:root[data-palette="tint"][data-theme="light"] {
+  --bg: #ffffff; --bg-raised: #f8f8f8; --surface: #ffffff; --surface-hover: #f3f3f3; --surface-active: #ededed; --surface-strong: #e8e8e8;
+  --text: #2a2a2a; --text-secondary: #414141; --text-muted: #6f6f6f; --text-faint: #858585;
+  --accent-text: #2a6b5c;    /* спокойнее, 6.3:1 к белому */
+  --accent-tint: #e6f6f1;
+  --invert: var(--accent);   /* кнопка = акцент #0a806c, белый 4.86:1 */
+  --invert-hover: var(--accent-hover);
+  --invert-fg: var(--accent-fg);
+}
+
+/* ===== Выраженная ===== */
+/* Фон, слои, рамки и вторичный текст заметно окрашены в тон акцента, главная кнопка = акцент. Светлота слоёв и текста та же,
+   что у основной темы, поэтому иерархия и контраст не плывут. Для остальных акцентов — блоки [data-palette="rich"] в accents.css */
+/* rich:begin — СГЕНЕРИРОВАНО tools/gen_accents.py */
+:root[data-palette="rich"]:not([data-theme="light"]) {
+  --bg: #04110e; --bg-raised: #071914; --surface: #091f1a; --surface-hover: #0e2721; --surface-active: #102b25; --surface-strong: #14322b;
+  --overlay: #000503d9;
+  --border-subtle: #74bfac1a; --border: #74bfac29; --border-strong: #74bfac42;
+  --text: #edf8f5; --text-secondary: #bdd8d0; --text-muted: #81a89d; --text-faint: #587d74;
+  --accent-text: #35c2a6; --accent-tint: #00372d;
+  --invert: var(--accent); --invert-hover: var(--accent-hover); --invert-fg: var(--accent-fg);   /* главная кнопка = акцент */
+}
+:root[data-palette="rich"][data-theme="light"] {
+  --bg: #edf9f5; --bg-raised: #e4f4f0; --surface: #f6fdfb; --surface-hover: #def2ec; --surface-active: #d7eee7; --surface-strong: #cfeae2;
+  --border-subtle: #00645414; --border: #00645424; --border-strong: #0064543a;
+  --text: #0c2721; --text-secondary: #25443c; --text-muted: #476c62; --text-faint: #67887f;
+  --accent-text: #03705e; --accent-tint: #c6efe4;
+  --invert: var(--accent); --invert-hover: var(--accent-hover); --invert-fg: var(--accent-fg);
+}
+/* rich:end */

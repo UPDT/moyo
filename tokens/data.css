@@ -1,0 +1,302 @@
+/* Данные и обратная связь · аватары, аккордеон, пустые состояния и ошибки, карточка с цифрой, список действий,
+   лента событий, комментарии, блок кода, клавиши, поле для копирования, таблица с сортировкой и выбором,
+   графики, спиннер, баннер, счётчик, точка «непрочитано».
+   Требует: colors, motion, type, space, icons, components.css. Поведение — js/data.js. */
+
+:where(.acc-item > summary, .alist-row, .react, .cmt-reply, .th-sort, .notif, .banner-x, .code-tab) {
+  --hd: var(--dur-hover-out);
+  outline: var(--focus-outline) solid transparent; outline-offset: var(--focus-offset);
+}
+@media (hover: hover) and (pointer: fine) { :where(.acc-item > summary, .alist-row, .react, .cmt-reply, .th-sort, .notif, .code-tab):hover { --hd: var(--dur-hover-in) } }
+:where(.acc-item > summary, .alist-row, .react, .cmt-reply, .th-sort, .notif, .code-tab):focus-visible { outline-color: var(--focus) }
+
+/* ============ Аватары ============ */
+/* Размеры 20 / 24 / 32 / 40 / 48. Цвет — по человеку (data-hue 1–6, стабильный), не по статусу.
+   Статус — точка с кольцом цвета фона и подписью для чтения с экрана */
+.avatar { position: relative }
+.avatar-xs { width: 20px; height: 20px; font-size: 9px }
+.avatar-lg { width: 40px; height: 40px; font-size: var(--fs-sm) }
+.avatar-xl { width: 48px; height: 48px; font-size: var(--fs-base) }
+.avatar img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover }
+.avatar[data-hue] { background: color-mix(in srgb, var(--hue) 24%, var(--surface-strong)); color: color-mix(in srgb, var(--hue) 55%, var(--text)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hue) 30%, transparent) }
+[data-hue="1"] { --hue: #4ea7fc } [data-hue="2"] { --hue: #9b8afb } [data-hue="3"] { --hue: #e0a43c }
+[data-hue="4"] { --hue: #e66a8a } [data-hue="5"] { --hue: #2bb5a0 } [data-hue="6"] { --hue: #8a8f98 }
+.avatar .st { position: absolute; right: -1px; bottom: -1px; width: 8px; height: 8px; border-radius: 50%; background: var(--text-faint); box-shadow: 0 0 0 2px var(--av-ring, var(--surface)) }
+.avatar-lg .st, .avatar-xl .st { width: 10px; height: 10px; right: 0; bottom: 0 }
+.st.online { background: var(--success) } .st.away { background: var(--warning) } .st.busy { background: var(--danger) }
+.avatars .avatar[data-hue] + .avatar, .avatars .avatar + .avatar[data-hue] { box-shadow: 0 0 0 2px var(--av-ring, var(--surface)), inset 0 0 0 1px color-mix(in srgb, var(--hue, #888) 30%, transparent) }
+.avatars-md .avatar + .avatar { margin-left: -8px }
+.avatar-more { background: var(--fill); color: var(--text-muted); font-variant-numeric: tabular-nums }
+.who { display: flex; align-items: center; gap: var(--sp-3); min-width: 0 }
+.who b { display: block; font-weight: var(--w-medium); color: var(--text); font-size: var(--fs-sm); line-height: var(--lh-sm) }
+.who span:not(.avatar):not(.st) { display: block; color: var(--text-muted); font-size: var(--fs-xs); line-height: var(--lh-xs) }
+
+/* ============ Аккордеон ============ */
+/* Строки разделены линиями, которые не доходят до краёв. Высота раскрытия — плавно (js), шеврон поворачивается.
+   Наведение — ярче заголовок, без подложки */
+.acc { display: grid }
+.acc-item { position: relative; overflow: hidden }
+.acc-item + .acc-item::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--border-subtle) }
+.acc-item > summary { display: flex; align-items: center; gap: var(--sp-3); min-height: 52px; padding: var(--sp-3) 0; list-style: none; cursor: pointer; border-radius: var(--r-xs);
+  font-weight: var(--w-medium); color: var(--text-secondary); outline-offset: -2px;
+  transition: color var(--hd) var(--ease-hover), outline-color var(--dur-focus) var(--ease-out) }
+.acc-item > summary::-webkit-details-marker { display: none }
+.acc-item > summary span { flex: 1 }
+.acc-item.is-open > summary { color: var(--text) }
+@media (hover: hover) and (pointer: fine) { .acc-item > summary:hover { color: var(--text) } }
+.acc-item > summary .lucide { flex: none; color: var(--text-muted); transition: transform var(--dur-state) var(--ease-out), color var(--hd) var(--ease-hover) }
+@media (hover: hover) and (pointer: fine) { .acc-item > summary:hover .lucide { color: var(--text) } }
+.acc-item.is-open > summary .lucide { transform: rotate(180deg) }
+.acc-body { padding: 0 var(--sp-8) var(--sp-4) 0; color: var(--text-muted); max-width: var(--measure) }
+.acc-body p { margin: 0 } .acc-body p + p { margin-top: var(--sp-2) }
+
+/* ============ Пустое состояние, ошибка, 404 ============ */
+.state { display: grid; justify-items: center; align-content: center; gap: var(--sp-2); padding: var(--sp-12) var(--sp-6); text-align: center; border-radius: var(--r-lg) }
+.state-dashed { border: 1px dashed color-mix(in srgb, var(--text) 18%, transparent) }
+.state-ic { display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: var(--sp-2); border-radius: var(--r-md); background: var(--fill); box-shadow: inset 0 0 0 1px var(--border); color: var(--text-muted) }
+.state h4 { margin: 0; font-size: var(--fs-md); line-height: var(--lh-md); letter-spacing: var(--ls-md); font-weight: var(--w-semibold) }
+.state p { margin: 0; max-width: 40ch; color: var(--text-muted); font-size: var(--fs-sm); line-height: var(--lh-sm) }
+.state .btn-row { justify-content: center; margin-top: var(--sp-3) }
+.state-danger .state-ic { background: var(--danger-tint); box-shadow: none; color: var(--danger-text) }
+.state-404 .big { font: var(--w-medium) 72px/1 var(--font-mono); letter-spacing: -.04em; color: var(--text-faint); margin-bottom: var(--sp-2); font-variant-numeric: tabular-nums }
+.state-404 .big b { color: var(--text); font-weight: inherit }
+
+/* ============ Карточка с цифрой ============ */
+/* Цифра — текстом (не цветом серии), изменение — со знаком и стрелкой (не только цвет) */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--grid-gap) }
+.stat { display: grid; gap: var(--sp-1); padding: var(--sp-5); border-radius: var(--r-xl); background: var(--surface); box-shadow: inset 0 0 0 1px var(--border-subtle), var(--shadow-sm) }
+.stat-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); color: var(--text-muted); font-size: var(--fs-sm); line-height: var(--lh-sm) }
+.stat-num { font-size: var(--fs-2xl); line-height: var(--lh-2xl); letter-spacing: var(--ls-2xl); font-weight: var(--w-medium); color: var(--text); font-variant-numeric: tabular-nums }
+.stat-num small { font-size: var(--fs-md); color: var(--text-muted); font-weight: var(--w-regular); margin-left: 2px }
+.stat-foot { color: var(--text-faint); font-size: var(--fs-xs); line-height: var(--lh-xs) }
+.delta { display: inline-flex; align-items: center; gap: 2px; height: 20px; padding: 0 6px; border-radius: var(--r-full); font-size: var(--fs-xs); line-height: 1; font-weight: var(--w-medium); font-variant-numeric: tabular-nums }
+.delta .lucide { width: 12px; height: 12px }
+.delta.up { background: var(--success-tint); color: var(--success-text) }
+.delta.down { background: var(--danger-tint); color: var(--danger-text) }
+.delta.flat { background: var(--fill); color: var(--text-muted) }
+.spark { display: block; width: 100%; height: 40px; margin-top: var(--sp-2); overflow: visible }
+.spark .ln { fill: none; stroke: var(--accent-text); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke }
+.spark .ar { fill: url(#spark-g); opacity: .9 }
+.spark .end { fill: var(--accent-text); stroke: var(--surface); stroke-width: 2 }
+
+/* ============ Список действий ============ */
+.alist { display: grid; padding: var(--sp-1); border-radius: var(--r-lg); background: var(--surface); box-shadow: inset 0 0 0 1px var(--border-subtle) }
+.alist-row { position: relative; display: grid; grid-template-columns: 32px 1fr auto; gap: var(--sp-3); align-items: center; min-height: 56px; padding: var(--sp-2) var(--sp-3); border-radius: var(--r-sm);
+  color: inherit; text-decoration: none; cursor: pointer; outline-offset: -2px;
+  transition: background-color var(--hd) var(--ease-hover), outline-color var(--dur-focus) var(--ease-out) }
+.alist-row + .alist-row::before { content: ""; position: absolute; top: 0; left: 56px; right: var(--sp-3); height: 1px; background: var(--border-subtle); transition: opacity var(--hd) var(--ease-hover) }
+@media (hover: hover) and (pointer: fine) { .alist-row:hover { background: var(--tile) } }
+@media (hover: hover) and (pointer: fine) { .alist-row:hover::before, .alist-row:hover + .alist-row::before { opacity: 0 } }
+.alist-ic { display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--r-sm); background: var(--fill); box-shadow: inset 0 0 0 1px var(--border-subtle); color: var(--text-muted) }
+.alist-tx { min-width: 0 }
+.alist-tx b { display: block; font-weight: var(--w-medium); color: var(--text); font-size: var(--fs-sm); line-height: var(--lh-sm) }
+.alist-tx span { display: block; color: var(--text-muted); font-size: var(--fs-xs); line-height: var(--lh-xs) }
+.alist-go { color: var(--text-faint); transition: color var(--hd) var(--ease-hover) }
+@media (hover: hover) and (pointer: fine) { .alist-row:hover .alist-go { color: var(--text) } }
+
+/* ============ Лента событий ============ */
+/* Линия между отметками не касается их (зазор 4px сверху и снизу) */
+.tl { display: grid; margin: 0; padding: 0; list-style: none }
+.tl li { position: relative; display: grid; grid-template-columns: 24px 1fr; gap: var(--sp-3); padding-bottom: var(--sp-5) }
+.tl li:last-child { padding-bottom: 0 }
+.tl li:not(:last-child)::before { content: ""; position: absolute; left: 11px; top: 28px; bottom: 4px; width: 2px; border-radius: 2px; background: var(--border) }
+.tl-mark { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--surface-strong); box-shadow: inset 0 0 0 1px var(--border); color: var(--text-muted) }
+.tl-mark .lucide { width: 12px; height: 12px }
+.tl-mark.ok { background: var(--success-tint); color: var(--success-text); box-shadow: none }
+.tl-mark.av { background: none; box-shadow: none }
+.tl-body { padding-top: 2px; min-width: 0; font-size: var(--fs-sm); line-height: var(--lh-sm); color: var(--text-muted) }
+.tl-body p { margin: 0 }
+.tl-body b { font-weight: var(--w-medium); color: var(--text) }
+.tl-body time { display: block; margin-top: 2px; color: var(--text-faint); font-size: var(--fs-xs); line-height: var(--lh-xs) }
+.tl-body .badge { vertical-align: 1px }
+.tl-quote { margin-top: var(--sp-2); padding: var(--sp-2) var(--sp-3); border-radius: var(--r-sm); background: var(--fill); box-shadow: inset 0 0 0 1px var(--border-subtle); color: var(--text-secondary) }
+
+/* ============ Комментарии ============ */
+.cmts { display: grid; gap: var(--sp-5) }
+.cmt { display: grid; grid-template-columns: 32px 1fr; gap: var(--sp-3) }
+.cmt .cmt { margin-top: var(--sp-4) }
+.cmt-main { min-width: 0 }
+.cmt-head { display: flex; align-items: baseline; gap: var(--sp-2); font-size: var(--fs-sm); line-height: var(--lh-sm) }
+.cmt-head b { font-weight: var(--w-medium); color: var(--text) }
+.cmt-head time { color: var(--text-faint); font-size: var(--fs-xs) }
+.cmt-text { margin: var(--sp-1) 0 0; color: var(--text-secondary); font-size: var(--fs-sm); line-height: var(--lh-sm) }
+.cmt-text .mention { color: var(--accent-text); font-weight: var(--w-medium) }
+.cmt-acts { display: flex; align-items: center; gap: var(--sp-1); margin-top: var(--sp-2) }
+.react { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 var(--sp-2); border: 0; border-radius: var(--r-full); background: var(--fill); box-shadow: inset 0 0 0 1px var(--border-subtle);
+  color: var(--text-muted); font: inherit; font-size: var(--fs-xs); font-variant-numeric: tabular-nums; cursor: pointer;
+  transition: color var(--hd) var(--ease-hover), background-color var(--dur-enter) var(--ease-out), box-shadow var(--dur-enter) var(--ease-out), outline-color var(--dur-focus) var(--ease-out) }
+.react .lucide { width: 14px; height: 14px }
+@media (hover: hover) and (pointer: fine) { .react:hover { color: var(--text) } }
+.react[aria-pressed=true] { background: var(--accent-tint); color: var(--accent-text); box-shadow: inset 0 0 0 1px var(--accent-border) }
+.react .n { display: inline-grid; overflow: hidden; height: 16px; line-height: 16px }
+.react .n > span { grid-area: 1 / 1 }
+.cmt-reply { height: 24px; padding: 0 var(--sp-2); border: 0; border-radius: var(--r-xs); background: none; color: var(--text-muted); font: inherit; font-size: var(--fs-xs); font-weight: var(--w-medium); cursor: pointer;
+  transition: color var(--hd) var(--ease-hover), outline-color var(--dur-focus) var(--ease-out) }
+@media (hover: hover) and (pointer: fine) { .cmt-reply:hover { color: var(--text) } }
+.composer { display: grid; grid-template-columns: 32px 1fr; gap: var(--sp-3) }
+.composer-box { display: grid; gap: var(--sp-2); padding: var(--sp-2); border-radius: var(--r-md); background: var(--fill); box-shadow: inset 0 0 0 1px var(--border);
+  transition: box-shadow var(--dur-focus) var(--ease-out) }
+.composer-box:focus-within { box-shadow: inset 0 0 0 1px var(--focus-field) }
+.composer-box textarea { min-height: 40px; max-height: 200px; field-sizing: content; padding: var(--sp-1) var(--sp-2); border: 0; background: none; outline: none; resize: none; color: var(--text); font: inherit; font-size: var(--fs-sm); line-height: var(--lh-sm) }
+.composer-box textarea::placeholder { color: var(--text-faint) }
+.composer-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2) }
+.composer-foot .hint { padding-left: var(--sp-2); white-space: nowrap }
+.composer-foot .btn { margin-left: auto }
+@media (max-width: 520px) { .composer-foot .hint { display: none } }   /* на телефоне сочетания клавиш не нужны */
+.grow-in { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--dur-expand) var(--ease-out) }
+.grow-in > * { min-height: 0; overflow: hidden; opacity: 0; transition: opacity var(--dur-enter) var(--ease-out) 60ms }
+.grow-in.on { grid-template-rows: 1fr }
+.grow-in.on > * { opacity: 1 }
+
+/* ============ Блок кода ============ */
+.code { border-radius: var(--r-lg); background: var(--bg-raised); box-shadow: inset 0 0 0 1px var(--border); overflow: hidden; min-width: 0 }
+.code-head { display: flex; align-items: center; gap: var(--sp-2); height: 40px; padding: 0 var(--sp-1) 0 var(--sp-4); box-shadow: inset 0 -1px 0 var(--border-subtle); font-size: var(--fs-xs); line-height: var(--lh-xs); color: var(--text-muted) }
+.code-file { display: inline-flex; align-items: center; gap: var(--sp-2); margin-right: auto; font-family: var(--font-mono) }
+.code-file .lucide { width: 14px; height: 14px }
+.code-tabs { display: flex; gap: var(--sp-1); margin-right: auto; height: 100% }
+.code-tab { position: relative; height: 100%; padding: 0 var(--sp-2); border: 0; background: none; color: var(--text-muted); font: var(--w-medium) var(--fs-xs)/var(--lh-xs) var(--font-mono); cursor: pointer; outline-offset: -2px;
+  transition: color var(--hd) var(--ease-hover), outline-color var(--dur-focus) var(--ease-out) }
+@media (hover: hover) and (pointer: fine) { .code-tab:hover { color: var(--text) } }
+.code-tab[aria-selected=true] { color: var(--text) }
+.code-tab::after { content: ""; position: absolute; left: var(--sp-2); right: var(--sp-2); bottom: 0; height: 2px; border-radius: 2px; background: var(--text); opacity: 0; transition: opacity var(--dur-enter) var(--ease-out) }
+.code-tab[aria-selected=true]::after { opacity: 1 }
+.code pre { margin: 0; padding: var(--sp-4); overflow-x: auto; font: var(--fs-sm)/20px var(--font-mono); color: var(--text-secondary); tab-size: 2; counter-reset: ln }
+.code pre code { font: inherit; display: block; transition: opacity var(--dur-enter) var(--ease-out) }
+.code pre code.swap { opacity: 0; transition-duration: var(--dur-exit) }
+.code .line { display: block; min-height: 20px }
+.code.numbered .line::before { counter-increment: ln; content: counter(ln); display: inline-block; width: 2ch; margin-right: var(--sp-4); text-align: right; color: var(--text-faint); user-select: none }
+.code .line.hl { margin: 0 calc(var(--sp-4) * -1); padding: 0 var(--sp-4); background: var(--accent-tint); box-shadow: inset 2px 0 0 var(--accent) }
+.tk-k { color: #c792ea } .tk-s { color: #a5d6a7 } .tk-f { color: #82aaff } .tk-n { color: #f7a46b } .tk-c { color: var(--text-faint) } .tk-p { color: var(--text-muted) }
+[data-theme="light"] .tk-k { color: #7c3aed } [data-theme="light"] .tk-s { color: #15803d } [data-theme="light"] .tk-f { color: #1d4ed8 } [data-theme="light"] .tk-n { color: #c2410c }
+.code-cmd .tk-p { user-select: none }
+code.inline { padding: 1px 5px; border-radius: var(--r-xs); background: var(--fill); box-shadow: inset 0 0 0 1px var(--border-subtle); font: .92em/1 var(--font-mono); color: var(--text) }
+
+/* клавиши и поле для копирования */
+.keys { display: inline-flex; align-items: center; gap: 2px; vertical-align: middle }
+.keys .plus { color: var(--text-faint); font-size: var(--fs-xs); padding: 0 2px }
+.copy-field { position: relative; display: flex; min-width: 0 }
+/* Кнопка по центру высоты поля, отступ справа = отступ сверху: в любом стиле и при любом радиусе кнопка сидит в углу ровно.
+   Длинное значение — многоточием, а не обрезом посреди символа */
+.copy-field { --cf-gap: calc((var(--h-md) - 28px) / 2) }
+.copy-field .input { padding-right: calc(var(--cf-gap) + 28px + var(--sp-2)); text-overflow: ellipsis; font-family: var(--font-mono); font-size: var(--fs-sm); color: var(--text-secondary) }
+.copy-field .icon-btn { position: absolute; right: var(--cf-gap); top: 0; bottom: 0; margin: auto 0 }
+
+/* ============ Таблица: сортировка, выбор, действия над выбранными ============ */
+.dt { position: relative; display: grid; gap: var(--sp-3) }
+.th-sort { display: inline-flex; align-items: center; gap: var(--sp-1); margin: 0 calc(var(--sp-1) * -1); padding: 2px var(--sp-1); border: 0; border-radius: var(--r-xs); background: none;
+  font: inherit; font-weight: var(--w-medium); color: var(--text-muted); cursor: pointer; transition: color var(--hd) var(--ease-hover), outline-color var(--dur-focus) var(--ease-out) }
+th[aria-sort=ascending] .th-sort, th[aria-sort=descending] .th-sort { color: var(--text) }
+@media (hover: hover) and (pointer: fine) { .th-sort:hover { color: var(--text) } }
+.num .th-sort { flex-direction: row-reverse }
+.sort-ic { display: inline-grid; width: 14px; height: 14px }
+.sort-ic > svg { grid-area: 1 / 1; width: 14px; height: 14px; transition: opacity var(--dur-enter) var(--ease-out), transform var(--dur-state) var(--ease-out) }
+.sort-ic .idle { opacity: .5 }
+.sort-ic .dir { opacity: 0 }
+th[aria-sort=ascending] .sort-ic .idle, th[aria-sort=descending] .sort-ic .idle { opacity: 0 }
+th[aria-sort=ascending] .sort-ic .dir, th[aria-sort=descending] .sort-ic .dir { opacity: 1 }
+th[aria-sort=descending] .sort-ic .dir { transform: rotate(180deg) }
+.table .cb { width: 40px; padding-right: 0 }
+.table .cb .check { vertical-align: middle }
+.table tbody tr.sel td { background: color-mix(in srgb, var(--accent) 9%, transparent) }
+@media (hover: hover) and (pointer: fine) { .table tbody tr.sel:hover td { background: color-mix(in srgb, var(--accent) 13%, transparent) } }
+.table tbody tr.sel td::before, .table tbody tr.sel + tr td::before { opacity: 0 }
+.table tbody tr.gone td { opacity: 0; transition: opacity var(--dur-exit) var(--ease-out) }
+/* панель действий над выбранными — всплывает над низом таблицы */
+.bulk { position: absolute; left: 50%; bottom: var(--sp-3); z-index: 5; display: flex; align-items: center; gap: var(--sp-1); max-width: calc(100% - 24px); padding: var(--sp-1) var(--sp-1) var(--sp-1) var(--sp-3);
+  border-radius: var(--r-md); background: var(--bg-raised); box-shadow: inset 0 0 0 1px var(--border-strong), var(--shadow-lg); font-size: var(--fs-sm); white-space: nowrap;
+  opacity: 0; visibility: hidden; transform: translate(-50%, var(--shift-md)); pointer-events: none;
+  transition: opacity var(--dur-exit) var(--ease-out), transform var(--dur-exit) var(--ease-out), visibility 0s linear var(--dur-exit) }
+.bulk.on { opacity: 1; visibility: visible; transform: translate(-50%, 0); pointer-events: auto; transition: opacity var(--dur-enter) var(--ease-out), transform var(--dur-enter) var(--ease-out), visibility 0s }
+.bulk-n { margin-right: var(--sp-2); color: var(--text-secondary); font-variant-numeric: tabular-nums }
+.bulk-n b { color: var(--text); font-weight: var(--w-medium) }
+.bulk-sep { width: 1px; height: 20px; margin: 0 var(--sp-1); background: var(--border) }
+@media (max-width: 560px) { .bulk .btn span { display: none } .bulk .btn { padding: 0 var(--sp-2) } }
+
+/* ============ Графики ============ */
+/* Одна серия — акцентом; сетка и оси тише данных; полосы — скругление 4px сверху, у основания прямые;
+   наведение: выбранная полоса остаётся, остальные гаснут; линия — перекрестие + точка с кольцом фона + подсказка */
+.chart { position: relative; min-width: 0 }
+.chart svg { display: block; width: 100%; overflow: visible; font-family: var(--font-sans); font-variant-numeric: tabular-nums }
+.chart .grid line { stroke: var(--border-subtle); stroke-width: 1; shape-rendering: crispEdges }
+.chart .grid line.base { stroke: var(--border-strong) }
+.chart .ax text { fill: var(--text-faint); font-size: 11px }
+.chart .bar { fill: var(--accent); transition: opacity var(--dur-enter) var(--ease-out) }
+.chart.hovering .bar:not(.on) { opacity: .4 }
+.chart .hit { fill: transparent; cursor: default }
+.chart .ln { fill: none; stroke: var(--accent-text); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round }
+.chart .ar { opacity: .9 }
+.chart .xh { stroke: var(--border-strong); stroke-width: 1; shape-rendering: crispEdges; opacity: 0; transition: opacity var(--dur-exit) var(--ease-out) }
+.chart .pt { fill: var(--accent-text); stroke: var(--surface); stroke-width: 2; opacity: 0; transition: opacity var(--dur-exit) var(--ease-out) }
+.chart.hovering .xh, .chart.hovering .pt { opacity: 1; transition-duration: var(--dur-enter) }
+.chart-tip { position: absolute; top: 0; left: 0; z-index: 2; padding: var(--sp-1) var(--sp-2); border-radius: var(--r-sm); background: var(--surface-strong); box-shadow: inset 0 0 0 1px var(--border), var(--shadow-md);
+  font-size: var(--fs-xs); line-height: var(--lh-xs); white-space: nowrap; pointer-events: none; color: var(--text-muted);
+  opacity: 0; transition: opacity var(--dur-exit) var(--ease-out) }
+.chart-tip b { display: block; color: var(--text); font-weight: var(--w-medium); font-size: var(--fs-sm); font-variant-numeric: tabular-nums }
+.chart.hovering .chart-tip { opacity: 1; transition-duration: var(--dur-enter) }
+.chart:focus-visible { outline: var(--focus-outline) solid var(--focus); outline-offset: 4px; border-radius: var(--r-xs) }
+.chart-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--sp-3); flex-wrap: wrap }
+.chart-head h4 { margin: 0; font-size: var(--fs-sm); line-height: var(--lh-sm); font-weight: var(--w-medium); color: var(--text-muted) }
+.chart-head .stat-num { margin-top: 2px }
+.chart-table[hidden], .chart[hidden] { display: none }
+
+/* ============ Обратная связь ============ */
+/* Спиннер (основа — components.css): размеры */
+.spinner-sm { width: 12px; height: 12px }
+.spinner-lg { width: 24px; height: 24px }
+/* Баннер на всю ширину: прячется плавно по высоте (сетка 1fr → 0fr) */
+.banner-w { display: grid; grid-template-rows: 1fr; transition: grid-template-rows var(--dur-collapse) var(--ease-out) }
+.banner-w > * { min-height: 0; overflow: hidden }
+.banner-w.off { grid-template-rows: 0fr }
+.banner { display: flex; align-items: center; justify-content: center; gap: var(--sp-3); min-height: 40px; padding: var(--sp-2) 48px; position: relative;
+  font-size: var(--fs-sm); line-height: var(--lh-sm); text-align: center; background: var(--fill); color: var(--text-secondary); box-shadow: inset 0 -1px 0 var(--border-subtle);
+  transition: opacity var(--dur-exit) var(--ease-out) }
+.banner-w.off .banner { opacity: 0 }
+/* узкий баннер (телефон, колонка): текст слева, поле справа только под крестик, короткая строка не переносится */
+.banner-w { container-type: inline-size }
+@container (max-width: 560px) { .banner { justify-content: flex-start; text-align: left; padding-left: var(--sp-4) } }
+.banner a { color: inherit; font-weight: var(--w-medium); text-decoration: underline 1px; text-underline-offset: 3px; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+  transition: text-decoration-color var(--dur-hover-out) var(--ease-hover) }
+@media (hover: hover) and (pointer: fine) { .banner a:hover { text-decoration-color: currentColor; transition-duration: var(--dur-hover-in) } }
+.banner-accent { background: var(--accent); color: var(--accent-fg); box-shadow: none }
+.banner-warning { background: var(--warning-tint); color: var(--text) }
+.banner-warning > .lucide { color: var(--warning-text) }
+.banner-x { position: absolute; right: var(--sp-2); top: 50%; translate: 0 -50%; display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: var(--r-xs);
+  background: none; color: inherit; opacity: .7; cursor: pointer; transition: opacity var(--hd) var(--ease-hover), outline-color var(--dur-focus) var(--ease-out) }
+@media (hover: hover) and (pointer: fine) { .banner-x:hover { opacity: 1; --hd: var(--dur-icon-in) } }
+.banner-x:focus-visible { outline-color: currentColor }
+/* Счётчик на значке: число сменяется сдвигом, ноль — счётчик гаснет */
+.has-count { position: relative }
+.count { position: absolute; top: 2px; right: 2px; display: inline-grid; min-width: 16px; height: 16px; padding: 0 4px; border-radius: var(--r-full); overflow: hidden;
+  background: var(--accent); color: var(--accent-fg); box-shadow: 0 0 0 2px var(--count-ring, var(--surface)); font-size: 10px; line-height: 16px; font-weight: var(--w-semibold); font-variant-numeric: tabular-nums; text-align: center;
+  pointer-events: none; transition: opacity var(--dur-enter) var(--ease-out) }
+.count > span { grid-area: 1 / 1 }
+.count.zero { opacity: 0 }
+/* Точка «непрочитано»: гаснет, когда прочитали; строки уведомлений разделены линиями */
+.notifs { display: grid; padding: var(--sp-1); border-radius: var(--r-lg); background: var(--bg); box-shadow: inset 0 0 0 1px var(--border-subtle) }
+/* Точка «непрочитано» — справа поверх края строки, а не своей колонкой слева: у прочитанных пустая колонка
+   сдвигала аватар и текст на 20px — дыра на месте того, чего нет */
+.notif { position: relative; display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: var(--sp-3); align-items: start; padding: var(--sp-3) var(--sp-8) var(--sp-3) var(--sp-3); border: 0; border-radius: var(--r-sm);
+  background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; outline-offset: -2px;
+  transition: background-color var(--hd) var(--ease-hover), outline-color var(--dur-focus) var(--ease-out) }
+.notif + .notif::before { content: ""; position: absolute; top: 0; left: 56px; right: var(--sp-3); height: 1px; background: var(--border-subtle); transition: opacity var(--hd) var(--ease-hover) }
+@media (hover: hover) and (pointer: fine) { .notif:hover { background: var(--tile) } }
+@media (hover: hover) and (pointer: fine) { .notif:hover::before, .notif:hover + .notif::before { opacity: 0 } }
+.unread { position: absolute; top: 18px; right: var(--sp-4); width: 8px; height: 8px; border-radius: 50%; background: var(--accent-text); transition: opacity var(--dur-state) var(--ease-out) }
+.notif.read .unread { opacity: 0 }
+.notif-tx { min-width: 0; font-size: var(--fs-sm); line-height: var(--lh-sm); color: var(--text-secondary); transition: color var(--dur-state) var(--ease-out) }
+.notif-tx b { font-weight: var(--w-medium); color: var(--text) }
+.notif-tx time { display: block; margin-top: 2px; color: var(--text-faint); font-size: var(--fs-xs); line-height: var(--lh-xs) }
+.notif.read .notif-tx { color: var(--text-muted) }
+.notifs-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2) }
+
+/* новый комментарий: зазор списка въезжает вместе с ним, а не появляется сразу */
+.cmts > .grow-in { margin-top: calc(var(--sp-5) * -1) }
+.cmts > .grow-in > div > * { padding-top: var(--sp-5) }
+/* число выбранных сменяется сдвигом */
+.bulk-n b { display: inline-grid; overflow: hidden; height: 20px; line-height: 20px; vertical-align: bottom }
+.bulk-n b > span { grid-area: 1 / 1 }
+.bulk-n i { font-style: normal }
+
+@media (prefers-reduced-motion: reduce) {
+  .grow-in, .banner-w { transition-duration: 0s }
+}

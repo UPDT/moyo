@@ -1,0 +1,32 @@
+/* ============ Полоса прокрутки: своя, поверх содержимого, места не занимает ============
+   Системная полоса скрыта везде — она отъедает 15–17px справа (на Windows) и сдвигает вёрстку, когда появляется.
+   Вместо неё js/scrollbar.js рисует тонкий бегунок поверх края: у страницы и у каждой области с overflow auto/scroll.
+   Бегунок проявляется при прокрутке и когда курсор у правого (нижнего) края, гаснет через ~1 с покоя.
+   Тянется мышью, клик по дорожке — прыжок туда. Отключить у области: data-sb="off" */
+html, .sb { scrollbar-width: none }
+html::-webkit-scrollbar, .sb::-webkit-scrollbar { display: none }
+
+.sb-bar { position: fixed; z-index: 60; pointer-events: none; opacity: 0;
+  transition: opacity var(--dur-hover-out) var(--ease-hover) }
+.sb-bar.in-host { position: absolute }
+.sb-bar.on { opacity: 1; transition-duration: var(--dur-hover-in) }
+.sb-bar.v { width: 12px }
+.sb-bar.h { height: 12px }
+/* дорожка ловит указатель только когда бегунок виден — иначе клики проходят к содержимому под краем */
+.sb-bar.on { pointer-events: auto }
+.sb-thumb { position: absolute; border-radius: 3px; background: color-mix(in srgb, var(--text) 24%, transparent);
+  transition: background-color var(--hd) var(--ease-hover), width var(--hd) var(--ease-out), height var(--hd) var(--ease-out); --hd: var(--dur-hover-out) }
+.sb-bar.v .sb-thumb { right: 2px; top: 0; width: 6px; height: var(--len); transform: translateY(var(--pos)) }
+.sb-bar.h .sb-thumb { bottom: 2px; left: 0; height: 6px; width: var(--len); transform: translateX(var(--pos)) }
+/* под курсором и при перетаскивании — ярче и чуть толще (растёт внутрь от края, не прыгает) */
+.sb-bar:is(.drag) .sb-thumb { --hd: var(--dur-hover-in); background: color-mix(in srgb, var(--text) 42%, transparent) }
+@media (hover: hover) and (pointer: fine) { .sb-bar:hover .sb-thumb { --hd: var(--dur-hover-in); background: color-mix(in srgb, var(--text) 42%, transparent) } }
+.sb-bar.v:is(.drag) .sb-thumb { width: 8px }
+@media (hover: hover) and (pointer: fine) { .sb-bar.v:hover .sb-thumb { width: 8px } }
+.sb-bar.h:is(.drag) .sb-thumb { height: 8px }
+@media (hover: hover) and (pointer: fine) { .sb-bar.h:hover .sb-thumb { height: 8px } }
+.sb-bar.drag .sb-thumb { transition-property: background-color, width, height }
+html.sb-dragging, html.sb-dragging * { cursor: default !important; user-select: none !important }
+
+@media (pointer: coarse) { .sb-bar, .sb-bar.on { pointer-events: none } }
+@media (forced-colors: active) { .sb-thumb { background: CanvasText } }
